@@ -110,6 +110,7 @@ All responses are JSON except `/poster`.
 | `GET /api/search?q=inception&tryAll=1` | Also query direct-only sites (slower). |
 | `GET /api/search?q=inception&nocache=1` | Bypass the search cache. |
 | `GET /api/search?q=inception&sources=bingebang,nova` | Limit to specific source IDs. |
+| `GET /api/search?q=inception&sources=nova,vexo&batch=1` | Return only those sources' statuses. Used by the Cloudflare client in small batches. |
 | `GET /api/sources` | The full source registry with status metadata. |
 | `GET /api/health` | Uptime, source counts, cache sizes. |
 | `GET /poster?url=https://…` | SSRF-guarded poster proxy. |
@@ -135,7 +136,7 @@ Example response shape:
   "sources": [
     { "id": "zoechip", "name": "Zoechip", "status": "ok", "count": 2, "ms": 940 }
   ],
-  "stats": { "searched": 17, "responded": 17, "withResults": 17, "manual": 35 }
+  "stats": { "searched": 17, "responded": 17, "withResults": 17, "manual": 34 }
 }
 ```
 
@@ -147,7 +148,15 @@ Source statuses: `ok`, `empty`, `blocked`, `timeout`, `error`, `manual`.
 
 ```
 streamfinder/
-├─ server.js                 HTTP server, search orchestration, poster proxy
+├─ server.js                 local HTTP server + shared route handlers
+├─ api/
+│  ├─ search.js              Vercel/serverless adapter: /api/search
+│  ├─ sources.js             Vercel/serverless adapter: /api/sources
+│  ├─ health.js              Vercel/serverless adapter: /api/health
+│  └─ poster.js              Vercel/serverless adapter: /poster
+├─ worker/
+│  └─ index.js               Cloudflare Worker adapter: /api/* + /poster
+├─ wrangler.toml             Cloudflare Worker + static asset config
 ├─ data/
 │  └─ sources.json           52-entry registry (hot-reloaded)
 ├─ lib/
@@ -162,6 +171,8 @@ streamfinder/
 │  └─ probe-sources.js       quick single-query probe / template discovery
 ├─ start.bat                 Windows launcher
 ├─ stop.bat                  stop whatever listens on port 8790
+├─ render.yaml               Render blueprint (optional)
+├─ vercel.json               Vercel function config
 └─ package.json
 ```
 
@@ -171,33 +182,61 @@ streamfinder/
 
 GitHub Pages **cannot** host this project: the app is a Node server, not a static site, and `/api/search` plus `/poster` need a running process server-side.
 
-GitHub stores the code; a Node host runs it. Render is the simplest option:
+GitHub stores the code; a host runs it. **Vercel** is the easiest free option that needs no credit card.
 
-1. Create an empty GitHub repository, then push this folder:
+### 1. Put the code on GitHub
 
-   ```bash
-   cd streamfinder
-   git init
-   git add .
-   git commit -m "Initial StreamFinder"
-   git branch -M main
-   git remote add origin https://github.com/YOUR-USERNAME/streamfinder.git
-   git push -u origin main
-   ```
+Create an empty repository on GitHub (do not add a README or license), then:
 
-   If you use the GitHub CLI, `gh auth login` followed by `gh repo create streamfinder --public --source=. --remote=origin --push` does the same thing.
+```bash
+cd streamfinder
+git init
+git add .
+git commit -m "Initial StreamFinder"
+git branch -M main
+git remote add origin https://github.com/YOUR-USERNAME/streamfinder.git
+git push -u origin main
+```
 
-2. In [Render](https://render.com), choose **New → Web Service**, connect the repository, and use:
-   - Runtime: **Node**
-   - Build command: `npm install`
-   - Start command: `npm start`
-   - Environment variable: `HOST=0.0.0.0`
+Or with the GitHub CLI:
 
-   The included `render.yaml` can also be used as a Blueprint for the same settings.
+```bash
+gh auth login
+gh repo create streamfinder --public --source=. --remote=origin --push
+```
 
-3. Deploy. Render gives you a URL like `https://streamfinder-xxxx.onrender.com`.
+### 2. Deploy on Vercel
 
-Free instances sleep after inactivity, so the first request can take 30–60 seconds. Scraping from a cloud IP may also trigger more bot challenges than running locally. Railway, Fly.io, and Koyeb work similarly — any host that runs a persistent Node process and provides a `PORT` environment variable is fine.
+1. Go to [vercel.com](https://vercel.com), sign in with GitHub, and choose **Add New → Project**.
+2. Import the `streamfinder` repository.
+3. Leave the framework preset as **Other** and leave the build/output settings empty. Vercel serves `public/` automatically and turns `api/*.js` into serverless functions.
+4. Click **Deploy**.
+5. Open the generated URL, for example `https://streamfinder-xxxx.vercel.app`.
+
+`vercel.json` sets a 60-second function limit for the slower “Try all sites” searches. No environment variables are required.
+
+> Vercel’s free Hobby plan is for personal projects and does not require a card. Serverless instances do not stay warm, so the first search after a quiet period may be a little slower, and in-memory caches reset between instances.
+
+### Deploy on Cloudflare Workers (optional)
+
+`worker/index.js` and `wrangler.toml` are included for Cloudflare Workers with static assets. The Worker handles `/api/*` and `/poster`, while `public/` is served by Cloudflare’s asset layer.
+
+```bash
+npx wrangler login
+npm run worker:deploy
+```
+
+If your existing Worker has a different name, change `name` in `wrangler.toml` first.
+
+> **Cloudflare free plan limits:** Workers Free allows **50 outbound subrequests** and **10 ms of CPU time per invocation**. The browser splits searches into groups of three sources, so each request stays well under both limits. If you call the API directly on Cloudflare, pass `batch=1` with no more than three `sources` IDs per request. Vercel remains available if you prefer one request per search.
+
+### Other Node hosts
+
+- **Koyeb** — one free web service (card required for verification, not charged on the free tier). Connect the GitHub repo, use Node, start command `npm start`, and set `HOST=0.0.0.0`.
+- **Render** — use the included `render.yaml` if your account still has the free web-service tier. Build `npm install`, start `npm start`, `HOST=0.0.0.0`.
+- **Railway / Fly.io / Northflank** — work similarly, but usually require a card or have limited free credits.
+
+Any host that runs a persistent Node process and provides a `PORT` environment variable will work. Free instances typically sleep after inactivity, so the first request can take 30–60 seconds. Scraping from a cloud IP may also trigger more bot challenges than running locally.
 
 ---
 

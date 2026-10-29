@@ -23,6 +23,9 @@
     expanded: new Set(),
     allSources: [],
     statusById: new Map(),
+    runtime: 'node',
+    batchSearch: false,
+    sourcesPromise: null,
     abort: null,
     manualExpanded: false
   };
@@ -101,7 +104,7 @@
     try { state.tryAll = localStorage.getItem(LS_TRY_ALL) === '1'; } catch {}
     els.tryAllToggle.checked = state.tryAll;
     renderRecent();
-    loadSources();
+    state.sourcesPromise = loadSources();
     window.addEventListener('scroll', () => {
       els.topbar.classList.toggle('scrolled', window.scrollY > 8);
     }, { passive: true });
@@ -243,6 +246,8 @@
       const res = await fetch('/api/sources', { headers: { accept: 'application/json' } });
       if (!res.ok) throw new Error('Could not load sources');
       const data = await res.json();
+      state.runtime = data.runtime || 'node';
+      state.batchSearch = state.runtime === 'cloudflare-worker';
       state.allSources = data.sources || [];
       els.sourceCount.textContent = state.allSources.length;
       els.heroCount.textContent = state.allSources.length;
@@ -356,6 +361,98 @@
 
   /* ---------------- searching ---------------- */
 
+  function searchSourceIds() {
+    return state.allSources
+      .filter(s => s.kind === 'stream' && (state.tryAll || s.verified))
+      .map(s => s.id);
+  }
+
+  function manualStatusFor(src, q) {
+    const template = src.searchUrl || '';
+    return {
+      id: src.id,
+      name: src.name,
+      host: src.host || src.url || '',
+      status: 'manual',
+      count: 0,
+      ms: 0,
+      searchUrl: template ? template.replace(/\{q\}/g, encodeURIComponent(q)) : src.url,
+      hasSearch: !!template,
+      manual: true,
+      error: ''
+    };
+  }
+
+  async function mapLimit(items, limit, fn) {
+    const out = new Array(items.length);
+    let next = 0;
+    async function worker() {
+      while (next < items.length) {
+        const i = next++;
+        out[i] = await fn(items[i], i);
+      }
+    }
+    await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
+    return out;
+  }
+
+  function batchStats(searched, sources) {
+    return {
+      searched,
+      responded: sources.filter(s => s.status === 'ok' || s.status === 'empty').length,
+      withResults: sources.filter(s => s.status === 'ok').length,
+      manual: sources.filter(s => s.status === 'manual').length
+    };
+  }
+
+  /* Cloudflare Workers Free allows 50 outbound subrequests per invocation. A
+     search across every source can exceed that once redirects are counted, so
+     the browser sends small batches. Each batch gets its own budget. */
+  async function runBatchedSearch(q, abort, options) {
+    const ids = searchSourceIds();
+    const batches = [];
+    for (let i = 0; i < ids.length; i += 3) batches.push(ids.slice(i, i + 3));
+
+    const started = performance.now();
+    const statusById = new Map();
+    const items = [];
+    let cached = batches.length > 0;
+
+    await mapLimit(batches, 6, async batch => {
+      const endpoint = `/api/search?q=${encodeURIComponent(q)}&sources=${batch.join(',')}${state.tryAll ? '&tryAll=1' : ''}&batch=1${options.force ? '&nocache=1' : ''}`;
+      try {
+        const res = await fetch(endpoint, { signal: abort.signal, headers: { accept: 'application/json' } });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || `Search failed (${res.status})`);
+        if (Array.isArray(data.results)) items.push(...data.results);
+        for (const src of data.sources || []) {
+          if (src.status !== 'manual') statusById.set(src.id, src);
+        }
+        if (!data.cached) cached = false;
+      } catch (e) {
+        if (e.name === 'AbortError' || abort.signal.aborted) throw e;
+        cached = false;
+        for (const id of batch) {
+          const src = state.allSources.find(s => s.id === id) || { id, name: id, url: '', host: '' };
+          statusById.set(id, { ...manualStatusFor(src, q), status: 'error', error: e.message || String(e) });
+        }
+      }
+    });
+
+    if (abort.signal.aborted || state.query !== q) return null;
+
+    const sources = state.allSources
+      .filter(src => src.kind === 'stream')
+      .map(src => statusById.get(src.id) || manualStatusFor(src, q));
+    return {
+      results: items,
+      sources,
+      stats: batchStats(ids.length, sources),
+      tookMs: Math.round(performance.now() - started),
+      cached
+    };
+  }
+
   async function runSearch(rawQuery, options = {}) {
     const q = cleanQuery(rawQuery);
     if (!q) { resetToHome(); return; }
@@ -388,11 +485,22 @@
     renderRecent();
     renderAll();
 
-    const endpoint = `/api/search?q=${encodeURIComponent(q)}${state.tryAll ? '&tryAll=1' : ''}${options.force ? '&nocache=1' : ''}`;
     try {
-      const res = await fetch(endpoint, { signal: abort.signal, headers: { accept: 'application/json' } });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || `Search failed (${res.status})`);
+      if (state.sourcesPromise) {
+        try { await state.sourcesPromise; } catch {}
+        if (state.query !== q) return;
+      }
+
+      let data;
+      if (state.batchSearch) {
+        data = await runBatchedSearch(q, abort, options);
+        if (!data) return;
+      } else {
+        const endpoint = `/api/search?q=${encodeURIComponent(q)}${state.tryAll ? '&tryAll=1' : ''}${options.force ? '&nocache=1' : ''}`;
+        const res = await fetch(endpoint, { signal: abort.signal, headers: { accept: 'application/json' } });
+        data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || `Search failed (${res.status})`);
+      }
       if (state.query !== q) return;
 
       state.items = Array.isArray(data.results) ? data.results : [];

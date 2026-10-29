@@ -181,9 +181,10 @@ async function handleSearch(params, res) {
   if (q.length > 80) return sendJson(res, 400, { error: 'Query is too long (max 80 characters)' });
 
   const tryAll = params.get('tryAll') === '1';
+  const batch = params.get('batch') === '1';
   const all = loadSources();
   const selected = selectSources(all, params);
-  const cacheKey = `${q.toLowerCase()}|${selected.map(s => s.id).join(',')}|${tryAll}`;
+  const cacheKey = `${q.toLowerCase()}|${selected.map(s => s.id).join(',')}|${tryAll}|${batch ? 'b' : 'f'}`;
   const noCache = params.get('nocache') === '1';
   const cached = noCache ? null : cacheGet(cacheKey);
   if (cached) return sendJson(res, 200, { ...cached, cached: true });
@@ -202,10 +203,13 @@ async function handleSearch(params, res) {
 
   // Sources we did not query (unverified, when not in tryAll mode) still get a
   // direct "search on site" link so every site in the list is one click away.
-  for (const s of all) {
-    if (s.kind !== 'stream' || statuses.some(x => x.id === s.id)) continue;
-    const manualSearchUrl = siteSearchUrlFor(s, q);
-    statuses.push({ id: s.id, name: s.name, host: safeHost(s.origin || s.url), status: 'manual', count: 0, ms: 0, searchUrl: manualSearchUrl || s.url, hasSearch: !!manualSearchUrl, manual: true, error: '' });
+  // Batched calls leave this to the browser so payloads stay small.
+  if (!batch) {
+    for (const s of all) {
+      if (s.kind !== 'stream' || statuses.some(x => x.id === s.id)) continue;
+      const manualSearchUrl = siteSearchUrlFor(s, q);
+      statuses.push({ id: s.id, name: s.name, host: safeHost(s.origin || s.url), status: 'manual', count: 0, ms: 0, searchUrl: manualSearchUrl || s.url, hasSearch: !!manualSearchUrl, manual: true, error: '' });
+    }
   }
 
   const sourceOrder = new Map(all.map((s, i) => [s.id, i]));
@@ -226,6 +230,29 @@ async function handleSearch(params, res) {
   };
   cacheSet(cacheKey, payload);
   return sendJson(res, 200, payload);
+}
+
+/* ---------------- /api/sources + /api/health ---------------- */
+
+function handleSources(res) {
+  const list = loadSources();
+  return sendJson(res, 200, {
+    runtime: 'node',
+    sources: list.map(s => ({
+      id: s.id, name: s.name, url: s.url, host: safeHost(s.origin || s.url),
+      verified: !!s.verified, enabled: s.enabled !== false, kind: s.kind,
+      searchUrl: s.siteSearch || (s.parser === 'json' ? null : s.search), note: s.note || '', latencyMs: s.latencyMs || null
+    }))
+  });
+}
+
+function handleHealth(res) {
+  const list = loadSources();
+  return sendJson(res, 200, {
+    ok: true, runtime: 'node', uptime: Math.round(process.uptime()),
+    sources: list.length, verified: list.filter(s => s.verified).length,
+    cachedSearches: searchCache.size, cachedPosters: posterCache.size
+  });
 }
 
 /* ---------------- image proxy (posters) ---------------- */
@@ -305,7 +332,7 @@ function sendJson(res, code, obj) {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   res.setHeader('Cache-Control', 'no-store');
   res.setHeader('Access-Control-Allow-Origin', '*');
-  const acceptsGzip = /\bgzip\b/.test(res.req.headers['accept-encoding'] || '');
+  const acceptsGzip = /\bgzip\b/.test(((res.req && res.req.headers) || {})['accept-encoding'] || '');
   if (acceptsGzip && body.length > 1024) {
     const gz = zlib.gzipSync(body, { level: 6 });
     res.setHeader('Content-Encoding', 'gzip');
@@ -368,23 +395,11 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (url.pathname === '/api/sources') {
-    const list = loadSources();
-    return sendJson(res, 200, {
-      sources: list.map(s => ({
-        id: s.id, name: s.name, url: s.url, host: safeHost(s.origin || s.url),
-        verified: !!s.verified, enabled: s.enabled !== false, kind: s.kind,
-        searchUrl: s.siteSearch || (s.parser === 'json' ? null : s.search), note: s.note || '', latencyMs: s.latencyMs || null
-      }))
-    });
+    return handleSources(res);
   }
 
   if (url.pathname === '/api/health') {
-    const list = loadSources();
-    return sendJson(res, 200, {
-      ok: true, uptime: Math.round(process.uptime()),
-      sources: list.length, verified: list.filter(s => s.verified).length,
-      cachedSearches: searchCache.size, cachedPosters: posterCache.size
-    });
+    return handleHealth(res);
   }
 
   if (url.pathname === '/poster') { await handlePoster(url.searchParams, res); return; }
@@ -395,14 +410,18 @@ const server = http.createServer(async (req, res) => {
   if (ms > 1500) console.log(`${req.method} ${url.pathname} ${ms}ms`);
 });
 
-server.listen(PORT, HOST, () => {
-  const list = loadSources();
-  console.log('');
-  console.log('  StreamFinder is running');
-  console.log(`  -> http://localhost:${PORT}`);
-  console.log(`  ${list.length} sources loaded (${list.filter(s => s.verified).length} live search)`);
-  console.log('');
-  console.log('  Keep this window open. Press Ctrl+C to stop.');
-});
+if (require.main === module) {
+  server.listen(PORT, HOST, () => {
+    const list = loadSources();
+    console.log('');
+    console.log('  StreamFinder is running');
+    console.log(`  -> http://localhost:${PORT}`);
+    console.log(`  ${list.length} sources loaded (${list.filter(s => s.verified).length} live search)`);
+    console.log('');
+    console.log('  Keep this window open. Press Ctrl+C to stop.');
+  });
 
-process.on('SIGINT', () => { console.log('\nStopping...'); server.close(() => process.exit(0)); });
+  process.on('SIGINT', () => { console.log('\nStopping...'); server.close(() => process.exit(0)); });
+}
+
+module.exports = { handleSearch, handlePoster, handleSources, handleHealth, loadSources, sendJson };
