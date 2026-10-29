@@ -1,0 +1,1164 @@
+[
+  {
+    "id": "bingebang",
+    "name": "BingeBang",
+    "url": "https://bingebang.st",
+    "origin": "https://bingebang.st",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://bingebang.st/search/{q}",
+      "https://bingebang.st/search?q={q}",
+      "https://bingebang.st/?s={q}",
+      "https://bingebang.st/search?keyword={q}"
+    ],
+    "parser": "json",
+    "search": "https://bingebang.st/api/search/multi?query={q}&page=1",
+    "enabled": true,
+    "verified": true,
+    "note": "ok · 3/3 queries",
+    "lastChecked": "2026-10-28T23:00:47.028Z",
+    "linkTemplate": "",
+    "latencyMs": 500,
+    "sample": [
+      "Inception",
+      "Inception: The Cobol Job",
+      "The Matrix",
+      "The Matrix Reloaded",
+      "Breaking Bad"
+    ],
+    "siteSearch": "https://bingebang.st/explore?q={q}"
+  },
+  {
+    "id": "zoechip",
+    "name": "Zoechip",
+    "url": "https://zoechip.bz/home",
+    "origin": "https://zoechip.bz",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://zoechip.bz/search/{q}",
+      "https://zoechip.bz/search?q={q}",
+      "https://zoechip.bz/?s={q}",
+      "https://zoechip.bz/search?keyword={q}"
+    ],
+    "parser": "flixer",
+    "search": "https://zoechip.bz/search/{q}",
+    "enabled": true,
+    "verified": true,
+    "note": "ok · 2/3 queries",
+    "latencyMs": 1763,
+    "lastChecked": "2026-10-28T23:00:47.029Z",
+    "sample": [
+      "Inception",
+      "Inception",
+      "The Matrix",
+      "The Matrix Reloaded"
+    ]
+  },
+  {
+    "id": "nexa",
+    "name": "Nexa",
+    "url": "https://nexa.mov",
+    "origin": "https://nexa.mov",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://nexa.mov/search/{q}",
+      "https://nexa.mov/search?q={q}",
+      "https://nexa.mov/?s={q}",
+      "https://nexa.mov/search?keyword={q}"
+    ],
+    "parser": "auto",
+    "search": "https://nexa.mov/?q={q}",
+    "enabled": false,
+    "verified": false,
+    "note": "no relevant results",
+    "lastChecked": "2026-10-28T23:00:47.029Z",
+    "sample": []
+  },
+  {
+    "id": "cinevu",
+    "name": "Cinevu",
+    "url": "https://cinevu.icu",
+    "origin": "https://cinevu.icu",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://cinevu.icu/search/{q}",
+      "https://cinevu.icu/search?q={q}",
+      "https://cinevu.icu/?s={q}",
+      "https://cinevu.icu/search?keyword={q}"
+    ],
+    "parser": "generic",
+    "search": "https://cinevu.icu/?s={q}",
+    "enabled": false,
+    "verified": false,
+    "note": "no relevant results",
+    "latencyMs": 316,
+    "lastChecked": "2026-10-28T23:00:47.029Z",
+    "sample": []
+  },
+  {
+    "id": "cinebros",
+    "name": "CineBros",
+    "url": "https://cinebros.net",
+    "origin": "https://cinebros.net",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://cinebros.net/search/{q}",
+      "https://cinebros.net/search?q={q}",
+      "https://cinebros.net/?s={q}",
+      "https://cinebros.net/search?keyword={q}"
+    ],
+    "parser": "auto",
+    "search": "https://cinebros.net/search?q={q}",
+    "enabled": false,
+    "verified": false,
+    "note": "no relevant results",
+    "lastChecked": "2026-10-28T23:00:47.029Z",
+    "sample": []
+  },
+  {
+    "id": "zenox",
+    "name": "Zenox",
+    "url": "https://zenox.lol",
+    "origin": "https://zenox.lol",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://zenox.lol/search/{q}",
+      "https://zenox.lol/search?q={q}",
+      "https://zenox.lol/?s={q}",
+      "https://zenox.lol/search?keyword={q}"
+    ],
+    "parser": "generic",
+    "search": "https://zenox.lol/search?q={q}",
+    "enabled": false,
+    "verified": false,
+    "note": "no relevant results",
+    "latencyMs": 410,
+    "lastChecked": "2026-10-28T23:00:47.029Z",
+    "sample": []
+  },
+  {
+    "id": "framextv",
+    "name": "FrameXTV",
+    "url": "https://framextv.xyz",
+    "origin": "https://framextv.cc",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://framextv.xyz/search/{q}",
+      "https://framextv.xyz/search?q={q}",
+      "https://framextv.xyz/?s={q}",
+      "https://framextv.xyz/search?keyword={q}"
+    ],
+    "parser": "auto",
+    "search": "https://framextv.cc/search?q={q}",
+    "enabled": false,
+    "verified": false,
+    "note": "no relevant results",
+    "lastChecked": "2026-10-28T23:00:47.029Z",
+    "sample": []
+  },
+  {
+    "id": "reelix",
+    "name": "Reelix",
+    "url": "https://reelix.ac",
+    "origin": "https://reelix.ac",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://reelix.ac/search/{q}",
+      "https://reelix.ac/search?q={q}",
+      "https://reelix.ac/?s={q}",
+      "https://reelix.ac/search?keyword={q}"
+    ],
+    "parser": "generic",
+    "search": "https://reelix.ac/search/{q}",
+    "enabled": true,
+    "verified": true,
+    "note": "ok · 3/3 queries",
+    "latencyMs": 2832,
+    "lastChecked": "2026-10-28T23:00:47.030Z",
+    "sample": [
+      "Inception",
+      "Bikini Inception",
+      "The Matrix",
+      "The Matrix Reloaded",
+      "Breaking Bad"
+    ]
+  },
+  {
+    "id": "allflix",
+    "name": "AllFlix",
+    "url": "https://allflix.org",
+    "origin": "https://allflix.org",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://allflix.org/search/{q}",
+      "https://allflix.org/search?q={q}",
+      "https://allflix.org/?s={q}",
+      "https://allflix.org/search?keyword={q}"
+    ],
+    "parser": "auto",
+    "search": null,
+    "enabled": false,
+    "verified": false,
+    "note": "http 403",
+    "lastChecked": "2026-10-28T22:19:07.668Z"
+  },
+  {
+    "id": "flaxjoy",
+    "name": "FlaxJoy",
+    "url": "https://flaxjoy.app",
+    "origin": "https://flaxjoy.app",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://flaxjoy.app/search/{q}",
+      "https://flaxjoy.app/search?q={q}",
+      "https://flaxjoy.app/?s={q}",
+      "https://flaxjoy.app/search?keyword={q}"
+    ],
+    "parser": "auto",
+    "search": "https://flaxjoy.app/search?q={q}",
+    "enabled": false,
+    "verified": false,
+    "note": "no relevant results",
+    "lastChecked": "2026-10-28T23:00:47.030Z",
+    "sample": []
+  },
+  {
+    "id": "zxcstream",
+    "name": "ZXCStream",
+    "url": "https://zxcstream.com",
+    "origin": "https://zxcstream.com",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://zxcstream.com/search/{q}",
+      "https://zxcstream.com/search?q={q}",
+      "https://zxcstream.com/?s={q}",
+      "https://zxcstream.com/search?keyword={q}"
+    ],
+    "parser": "generic",
+    "search": "https://zxcstream.com/?s={q}",
+    "enabled": false,
+    "verified": false,
+    "note": "no relevant results",
+    "latencyMs": 503,
+    "lastChecked": "2026-10-28T23:00:47.030Z",
+    "sample": []
+  },
+  {
+    "id": "moviepal",
+    "name": "MoviePal",
+    "url": "https://moviepal.live",
+    "origin": "https://moviepal.live",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://moviepal.live/search/{q}",
+      "https://moviepal.live/search?q={q}",
+      "https://moviepal.live/?s={q}",
+      "https://moviepal.live/search?keyword={q}"
+    ],
+    "parser": "auto",
+    "search": "https://moviepal.live/search?q={q}",
+    "enabled": false,
+    "verified": false,
+    "note": "no relevant results",
+    "lastChecked": "2026-10-28T23:00:47.030Z",
+    "sample": []
+  },
+  {
+    "id": "cineruv",
+    "name": "Cineruv",
+    "url": "https://cineruv.website",
+    "origin": "https://cineruv.website",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://cineruv.website/search/{q}",
+      "https://cineruv.website/search?q={q}",
+      "https://cineruv.website/?s={q}",
+      "https://cineruv.website/search?keyword={q}"
+    ],
+    "parser": "json",
+    "search": "https://api.movenerds.space/api/media/search?q={q}",
+    "enabled": true,
+    "verified": true,
+    "note": "ok · 3/3 queries",
+    "lastChecked": "2026-10-28T23:00:47.030Z",
+    "linkTemplate": "https://cineruv.website/{type}/{id}",
+    "siteSearch": "https://cineruv.website/search?q={q}",
+    "sample": [
+      "Inception",
+      "Bikini Inception",
+      "The Matrix",
+      "The Matrix Reloaded",
+      "Breaking Bad"
+    ]
+  },
+  {
+    "id": "vexo",
+    "name": "Vexo",
+    "url": "https://vexo.surf",
+    "origin": "https://vexo.surf",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://vexo.surf/search/{q}",
+      "https://vexo.surf/search?q={q}",
+      "https://vexo.surf/?s={q}",
+      "https://vexo.surf/search?keyword={q}"
+    ],
+    "parser": "json",
+    "search": "https://core.vexo.surf/api/tmdb/search/multi?query={q}",
+    "enabled": true,
+    "verified": true,
+    "note": "ok · 3/3 queries",
+    "lastChecked": "2026-10-28T23:00:47.030Z",
+    "linkTemplate": "https://vexo.surf/{type}/{id}",
+    "latencyMs": 500,
+    "sample": [
+      "Inception",
+      "Bikini Inception",
+      "The Matrix",
+      "The Matrix Reloaded",
+      "Breaking Bad"
+    ],
+    "siteSearch": "https://vexo.surf/search?q={q}"
+  },
+  {
+    "id": "cinejoy",
+    "name": "Cinejoy",
+    "url": "https://cinejoy.to",
+    "origin": "https://cinejoy.to",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://cinejoy.to/search/{q}",
+      "https://cinejoy.to/search?q={q}",
+      "https://cinejoy.to/?s={q}",
+      "https://cinejoy.to/search?keyword={q}"
+    ],
+    "parser": "auto",
+    "search": null,
+    "enabled": false,
+    "verified": false,
+    "note": "no results",
+    "lastChecked": "2026-10-28T22:19:07.668Z"
+  },
+  {
+    "id": "flystream",
+    "name": "FlyStream",
+    "url": "https://flystream.net",
+    "origin": "https://flystream.net",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://flystream.net/search/{q}",
+      "https://flystream.net/search?q={q}",
+      "https://flystream.net/?s={q}",
+      "https://flystream.net/search?keyword={q}"
+    ],
+    "parser": "auto",
+    "search": "https://flystream.net/search?q={q}",
+    "enabled": false,
+    "verified": false,
+    "note": "no relevant results",
+    "lastChecked": "2026-10-28T23:00:47.030Z",
+    "sample": []
+  },
+  {
+    "id": "nova",
+    "name": "Nova",
+    "url": "https://novahd.cc",
+    "origin": "https://novahd.cc",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://novahd.cc/search/{q}",
+      "https://novahd.cc/search?q={q}",
+      "https://novahd.cc/?s={q}",
+      "https://novahd.cc/search?keyword={q}"
+    ],
+    "parser": "json",
+    "search": "https://novahd.cc/api/search?search={q}&page=1",
+    "enabled": true,
+    "verified": true,
+    "note": "ok · 3/3 queries",
+    "lastChecked": "2026-10-28T23:00:47.030Z",
+    "linkTemplate": "https://novahd.cc/{type}/{id}",
+    "latencyMs": 500,
+    "sample": [
+      "Inception",
+      "Bikini Inception",
+      "The Matrix",
+      "The Matrix Reloaded",
+      "Breaking Bad"
+    ],
+    "siteSearch": "https://novahd.cc/search?q={q}"
+  },
+  {
+    "id": "atlantic",
+    "name": "Atlantic",
+    "url": "https://atlantic.st",
+    "origin": "https://atlantic.st",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://atlantic.st/search/{q}",
+      "https://atlantic.st/search?q={q}",
+      "https://atlantic.st/?s={q}",
+      "https://atlantic.st/search?keyword={q}"
+    ],
+    "parser": "auto",
+    "search": "https://atlantic.st/search?q={q}",
+    "enabled": false,
+    "verified": false,
+    "note": "no relevant results",
+    "lastChecked": "2026-10-28T23:00:47.030Z",
+    "sample": []
+  },
+  {
+    "id": "zetmoon",
+    "name": "ZetMoon",
+    "url": "https://zetmoon.live",
+    "origin": "https://zetmoon.live",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://zetmoon.live/search/{q}",
+      "https://zetmoon.live/search?q={q}",
+      "https://zetmoon.live/?s={q}",
+      "https://zetmoon.live/search?keyword={q}"
+    ],
+    "parser": "auto",
+    "search": "https://zetmoon.live/search?q={q}",
+    "enabled": false,
+    "verified": false,
+    "note": "no relevant results",
+    "lastChecked": "2026-10-28T23:00:47.030Z",
+    "sample": []
+  },
+  {
+    "id": "flickbuff",
+    "name": "Flickbuff",
+    "url": "https://flickbuff.cc",
+    "origin": "https://flickbuff.cc",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://flickbuff.cc/search/{q}",
+      "https://flickbuff.cc/search?q={q}",
+      "https://flickbuff.cc/?s={q}",
+      "https://flickbuff.cc/search?keyword={q}"
+    ],
+    "parser": "auto",
+    "search": "https://flickbuff.cc/search?q={q}",
+    "enabled": false,
+    "verified": false,
+    "note": "no relevant results",
+    "lastChecked": "2026-10-28T23:00:47.030Z",
+    "sample": []
+  },
+  {
+    "id": "flaxfer",
+    "name": "Flaxfer",
+    "url": "https://flaxfer.lol",
+    "origin": "https://flaxfer.lol",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://flaxfer.lol/search/{q}",
+      "https://flaxfer.lol/search?q={q}",
+      "https://flaxfer.lol/?s={q}",
+      "https://flaxfer.lol/search?keyword={q}"
+    ],
+    "parser": "auto",
+    "search": "https://flaxfer.lol/search?q={q}",
+    "enabled": false,
+    "verified": false,
+    "note": "no relevant results",
+    "lastChecked": "2026-10-28T23:00:47.030Z",
+    "sample": []
+  },
+  {
+    "id": "cinehd",
+    "name": "CineHD",
+    "url": "https://cinehd.vc/home",
+    "origin": "https://cinehd.vc",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://cinehd.vc/search/{q}",
+      "https://cinehd.vc/search?q={q}",
+      "https://cinehd.vc/?s={q}",
+      "https://cinehd.vc/search?keyword={q}"
+    ],
+    "parser": "generic",
+    "search": "https://cinehd.vc/search?q={q}",
+    "enabled": false,
+    "verified": false,
+    "note": "no relevant results",
+    "latencyMs": 879,
+    "lastChecked": "2026-10-28T23:00:47.030Z",
+    "sample": []
+  },
+  {
+    "id": "filmex",
+    "name": "Filmex",
+    "url": "https://filmex.to",
+    "origin": "https://filmex.to",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://filmex.to/search/{q}",
+      "https://filmex.to/search?q={q}",
+      "https://filmex.to/?s={q}",
+      "https://filmex.to/search?keyword={q}"
+    ],
+    "parser": "auto",
+    "search": "https://filmex.to/search?query={q}",
+    "enabled": false,
+    "verified": false,
+    "note": "no relevant results",
+    "lastChecked": "2026-10-28T23:00:47.030Z",
+    "sample": []
+  },
+  {
+    "id": "dulo",
+    "name": "Dulo",
+    "url": "https://dulo.mov",
+    "origin": "https://dulo.mov",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://dulo.mov/search/{q}",
+      "https://dulo.mov/search?q={q}",
+      "https://dulo.mov/?s={q}",
+      "https://dulo.mov/search?keyword={q}"
+    ],
+    "parser": "auto",
+    "search": "https://dulo.mov/search?q={q}",
+    "enabled": false,
+    "verified": false,
+    "note": "no relevant results",
+    "lastChecked": "2026-10-28T23:00:47.030Z",
+    "sample": []
+  },
+  {
+    "id": "flixeo",
+    "name": "Flixeo",
+    "url": "https://flixeo.tv/home",
+    "origin": "https://flixeo.tv",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://flixeo.tv/search/{q}",
+      "https://flixeo.tv/search?q={q}",
+      "https://flixeo.tv/?s={q}",
+      "https://flixeo.tv/search?keyword={q}"
+    ],
+    "parser": "generic",
+    "search": "https://flixeo.tv/search?q={q}",
+    "enabled": true,
+    "verified": true,
+    "note": "ok · 3/3 queries",
+    "latencyMs": 1286,
+    "lastChecked": "2026-10-28T23:00:47.030Z",
+    "sample": [
+      "Inception",
+      "Bikini Inception",
+      "The Matrix",
+      "The Matrix Reloaded",
+      "Breaking Bad"
+    ]
+  },
+  {
+    "id": "hydrahd",
+    "name": "HydraHD",
+    "url": "https://hydrahd.info",
+    "origin": "https://hydrahd.info",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://hydrahd.info/search/{q}",
+      "https://hydrahd.info/search?q={q}",
+      "https://hydrahd.info/?s={q}",
+      "https://hydrahd.info/search?keyword={q}"
+    ],
+    "parser": "generic",
+    "search": "https://hydrahd.info/search/{q}",
+    "enabled": false,
+    "verified": false,
+    "note": "no relevant results",
+    "latencyMs": 517,
+    "lastChecked": "2026-10-28T23:00:47.030Z",
+    "sample": []
+  },
+  {
+    "id": "rive",
+    "name": "Rive",
+    "url": "https://rentry.co/rivestream",
+    "origin": "https://rentry.co",
+    "kind": "link",
+    "searchTemplates": [],
+    "parser": "auto",
+    "search": null,
+    "enabled": false,
+    "verified": false,
+    "note": ""
+  },
+  {
+    "id": "redflix",
+    "name": "Redflix",
+    "url": "https://redflix.one",
+    "origin": "https://redflix.one",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://redflix.one/search/{q}",
+      "https://redflix.one/search?q={q}",
+      "https://redflix.one/?s={q}",
+      "https://redflix.one/search?keyword={q}"
+    ],
+    "parser": "generic",
+    "search": "https://redflix.one/?s={q}",
+    "enabled": false,
+    "verified": false,
+    "note": "no relevant results",
+    "latencyMs": 720,
+    "lastChecked": "2026-10-28T23:00:47.030Z",
+    "sample": []
+  },
+  {
+    "id": "himovies",
+    "name": "HiMovies",
+    "url": "https://himovies.ac/home",
+    "origin": "https://himovies.ac",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://himovies.ac/search/{q}",
+      "https://himovies.ac/search?q={q}",
+      "https://himovies.ac/?s={q}",
+      "https://himovies.ac/search?keyword={q}"
+    ],
+    "parser": "flixer",
+    "search": "https://himovies.ac/search/{q}",
+    "enabled": true,
+    "verified": true,
+    "note": "ok · 3/3 queries",
+    "latencyMs": 1098,
+    "lastChecked": "2026-10-28T23:00:47.030Z",
+    "sample": [
+      "Inception",
+      "Inception",
+      "The Matrix",
+      "The Matrix Reloaded",
+      "Breaking Bad"
+    ]
+  },
+  {
+    "id": "ridomovies",
+    "name": "RidoMovies",
+    "url": "https://ridomovies.tv/home",
+    "origin": "https://ridomovies.tv",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://ridomovies.tv/search/{q}",
+      "https://ridomovies.tv/search?q={q}",
+      "https://ridomovies.tv/?s={q}",
+      "https://ridomovies.tv/search?keyword={q}"
+    ],
+    "parser": "auto",
+    "search": null,
+    "enabled": false,
+    "verified": false,
+    "note": "http 403",
+    "lastChecked": "2026-10-28T22:19:07.668Z"
+  },
+  {
+    "id": "flixbaba",
+    "name": "Flixbaba",
+    "url": "https://flixbaba.info",
+    "origin": "https://flixbaba.info",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://flixbaba.info/search/{q}",
+      "https://flixbaba.info/search?q={q}",
+      "https://flixbaba.info/?s={q}",
+      "https://flixbaba.info/search?keyword={q}"
+    ],
+    "parser": "auto",
+    "search": "https://flixbaba.info/search?q={q}",
+    "enabled": false,
+    "verified": false,
+    "note": "no relevant results",
+    "lastChecked": "2026-10-28T23:00:47.030Z",
+    "sample": []
+  },
+  {
+    "id": "streamingunity",
+    "name": "StreamingUnity",
+    "url": "https://streamingunity.dog",
+    "origin": "https://streamingunity.fun",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://streamingunity.dog/search/{q}",
+      "https://streamingunity.dog/search?q={q}",
+      "https://streamingunity.dog/?s={q}",
+      "https://streamingunity.dog/search?keyword={q}"
+    ],
+    "parser": "generic",
+    "search": "https://streamingunity.fun/?s={q}",
+    "enabled": false,
+    "verified": false,
+    "note": "no relevant results",
+    "latencyMs": 873,
+    "lastChecked": "2026-10-28T23:00:47.030Z",
+    "sample": []
+  },
+  {
+    "id": "movienerds",
+    "name": "MovieNerds",
+    "url": "https://movienerds.site",
+    "origin": "https://movienerds.site",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://movienerds.site/search/{q}",
+      "https://movienerds.site/search?q={q}",
+      "https://movienerds.site/?s={q}",
+      "https://movienerds.site/search?keyword={q}"
+    ],
+    "parser": "json",
+    "search": "https://api.movenerds.space/api/media/search?q={q}",
+    "enabled": true,
+    "verified": true,
+    "note": "ok · 3/3 queries",
+    "lastChecked": "2026-10-28T23:00:47.030Z",
+    "linkTemplate": "https://movienerds.site/{type}/{id}",
+    "siteSearch": "https://movienerds.site/search?q={q}",
+    "sample": [
+      "Inception",
+      "Bikini Inception",
+      "The Matrix",
+      "The Matrix Reloaded",
+      "Breaking Bad"
+    ]
+  },
+  {
+    "id": "vidplay",
+    "name": "VidPlay",
+    "url": "https://vidplay.top",
+    "origin": "https://vidplay.top",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://vidplay.top/search/{q}",
+      "https://vidplay.top/search?q={q}",
+      "https://vidplay.top/?s={q}",
+      "https://vidplay.top/search?keyword={q}"
+    ],
+    "parser": "generic",
+    "search": "https://vidplay.top/search/{q}",
+    "enabled": false,
+    "verified": false,
+    "note": "no relevant results",
+    "latencyMs": 2085,
+    "lastChecked": "2026-10-28T23:00:47.030Z",
+    "sample": []
+  },
+  {
+    "id": "theflixbay",
+    "name": "TheFlixBay",
+    "url": "https://theflixbay.com",
+    "origin": "https://theflixbay.com",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://theflixbay.com/search/{q}",
+      "https://theflixbay.com/search?q={q}",
+      "https://theflixbay.com/?s={q}",
+      "https://theflixbay.com/search?keyword={q}"
+    ],
+    "parser": "auto",
+    "search": "https://theflixbay.com/index.php?query={q}",
+    "enabled": false,
+    "verified": false,
+    "note": "no relevant results",
+    "lastChecked": "2026-10-28T23:00:47.030Z",
+    "sample": []
+  },
+  {
+    "id": "1shows",
+    "name": "1Shows",
+    "url": "https://1shows.org",
+    "origin": "https://1shows.org",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://1shows.org/search/{q}",
+      "https://1shows.org/search?q={q}",
+      "https://1shows.org/?s={q}",
+      "https://1shows.org/search?keyword={q}"
+    ],
+    "parser": "auto",
+    "search": "https://1shows.org/search?q={q}",
+    "enabled": false,
+    "verified": false,
+    "note": "no relevant results",
+    "lastChecked": "2026-10-28T23:00:47.030Z",
+    "sample": []
+  },
+  {
+    "id": "nepu",
+    "name": "NEPU",
+    "url": "https://nepu.io",
+    "origin": "https://nepu.io",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://nepu.io/search/{q}",
+      "https://nepu.io/search?q={q}",
+      "https://nepu.io/?s={q}",
+      "https://nepu.io/search?keyword={q}"
+    ],
+    "parser": "auto",
+    "search": null,
+    "enabled": false,
+    "verified": false,
+    "note": "http 403",
+    "lastChecked": "2026-10-28T22:19:07.668Z"
+  },
+  {
+    "id": "netprime",
+    "name": "NetPrime",
+    "url": "https://netprime.bz",
+    "origin": "https://netprime.bz",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://netprime.bz/search/{q}",
+      "https://netprime.bz/search?q={q}",
+      "https://netprime.bz/?s={q}",
+      "https://netprime.bz/search?keyword={q}"
+    ],
+    "parser": "auto",
+    "search": null,
+    "enabled": false,
+    "verified": false,
+    "note": "no results",
+    "lastChecked": "2026-10-28T22:19:07.668Z"
+  },
+  {
+    "id": "freekz",
+    "name": "Freekz",
+    "url": "https://freekz.to",
+    "origin": "https://freekz.to",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://freekz.to/search/{q}",
+      "https://freekz.to/search?q={q}",
+      "https://freekz.to/?s={q}",
+      "https://freekz.to/search?keyword={q}"
+    ],
+    "parser": "generic",
+    "search": "https://freekz.to/?s={q}",
+    "enabled": false,
+    "verified": false,
+    "note": "no relevant results",
+    "latencyMs": 435,
+    "lastChecked": "2026-10-28T23:00:47.030Z",
+    "sample": []
+  },
+  {
+    "id": "solarmovie",
+    "name": "SolarMovie",
+    "url": "https://solarmovie2.com",
+    "origin": "https://ww1.solarmovie2.com",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://solarmovie2.com/search/{q}",
+      "https://solarmovie2.com/search?q={q}",
+      "https://solarmovie2.com/?s={q}",
+      "https://solarmovie2.com/search?keyword={q}"
+    ],
+    "parser": "generic",
+    "search": "https://ww1.solarmovie2.com/?s={q}",
+    "enabled": false,
+    "verified": false,
+    "note": "no relevant results",
+    "latencyMs": 4384,
+    "lastChecked": "2026-10-28T23:00:47.030Z",
+    "sample": []
+  },
+  {
+    "id": "yesmovies",
+    "name": "YesMovies",
+    "url": "https://yesmovies.ag",
+    "origin": "https://yesmovies.ag",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://yesmovies.ag/search/{q}",
+      "https://yesmovies.ag/search?q={q}",
+      "https://yesmovies.ag/?s={q}",
+      "https://yesmovies.ag/search?keyword={q}"
+    ],
+    "parser": "auto",
+    "search": "https://ww2.yesmovies.ag/?s={q}",
+    "enabled": false,
+    "verified": false,
+    "note": "no relevant results",
+    "lastChecked": "2026-10-28T23:00:47.030Z",
+    "sample": []
+  },
+  {
+    "id": "myflixer",
+    "name": "MyFlixer",
+    "url": "https://myflixer.sc/home",
+    "origin": "https://myflixer.sc",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://myflixer.sc/search/{q}",
+      "https://myflixer.sc/search?q={q}",
+      "https://myflixer.sc/?s={q}",
+      "https://myflixer.sc/search?keyword={q}"
+    ],
+    "parser": "flixer",
+    "search": "https://myflixer.sc/search/{q}",
+    "enabled": true,
+    "verified": true,
+    "note": "ok · 3/3 queries",
+    "latencyMs": 196,
+    "lastChecked": "2026-10-28T23:00:47.030Z",
+    "sample": [
+      "Inception",
+      "Inception",
+      "The Matrix",
+      "The Matrix Reloaded",
+      "Breaking Bad"
+    ]
+  },
+  {
+    "id": "2flix",
+    "name": "2Flix",
+    "url": "https://2flix.lol/home",
+    "origin": "https://2flix.lol",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://2flix.lol/search/{q}",
+      "https://2flix.lol/search?q={q}",
+      "https://2flix.lol/?s={q}",
+      "https://2flix.lol/search?keyword={q}"
+    ],
+    "parser": "generic",
+    "search": "https://2flix.lol/search/{q}",
+    "enabled": true,
+    "verified": true,
+    "note": "ok · 3/3 queries",
+    "latencyMs": 2181,
+    "lastChecked": "2026-10-28T23:00:47.030Z",
+    "sample": [
+      "Inception",
+      "The Matrix Reloaded",
+      "The Matrix Revolutions",
+      "El Camino: A Breaking Bad Movie",
+      "Breaking Bad"
+    ]
+  },
+  {
+    "id": "moviesjoy",
+    "name": "MoviesJoy",
+    "url": "https://moviesjoy.bz/home",
+    "origin": "https://moviesjoy.bz",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://moviesjoy.bz/search/{q}",
+      "https://moviesjoy.bz/search?q={q}",
+      "https://moviesjoy.bz/?s={q}",
+      "https://moviesjoy.bz/search?keyword={q}"
+    ],
+    "parser": "flixer",
+    "search": "https://moviesjoy.bz/search/{q}",
+    "enabled": true,
+    "verified": true,
+    "note": "ok · 3/3 queries",
+    "latencyMs": 693,
+    "lastChecked": "2026-10-28T23:00:47.030Z",
+    "sample": [
+      "Inception",
+      "Inception",
+      "The Matrix",
+      "The Matrix Reloaded",
+      "Breaking Bad"
+    ]
+  },
+  {
+    "id": "cornclick",
+    "name": "CornClick",
+    "url": "https://cornclick.com",
+    "origin": "https://cornclick.com",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://cornclick.com/search/{q}",
+      "https://cornclick.com/search?q={q}",
+      "https://cornclick.com/?s={q}",
+      "https://cornclick.com/search?keyword={q}"
+    ],
+    "parser": "generic",
+    "search": "https://cornclick.com/search?q={q}",
+    "enabled": true,
+    "verified": true,
+    "note": "ok · 3/3 queries",
+    "latencyMs": 2628,
+    "lastChecked": "2026-10-28T23:00:47.030Z",
+    "sample": [
+      "Inception",
+      "Inception: Motion Comics",
+      "The Matrix",
+      "The Matrix Reloaded Revisited",
+      "No Half Measures: Creating the Final Season of Breaking Bad"
+    ]
+  },
+  {
+    "id": "flixer",
+    "name": "Flixer",
+    "url": "https://flixer.gd",
+    "origin": "https://flixer.gd",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://flixer.gd/search/{q}",
+      "https://flixer.gd/search?q={q}",
+      "https://flixer.gd/?s={q}",
+      "https://flixer.gd/search?keyword={q}"
+    ],
+    "parser": "auto",
+    "search": "https://flixer.gd/search?q={q}",
+    "enabled": false,
+    "verified": false,
+    "note": "no relevant results",
+    "lastChecked": "2026-10-28T23:00:47.030Z",
+    "sample": []
+  },
+  {
+    "id": "hdtoday",
+    "name": "HDToday",
+    "url": "https://hdtoday.sc/home",
+    "origin": "https://hdtoday24.at",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://hdtoday.sc/search/{q}",
+      "https://hdtoday.sc/search?q={q}",
+      "https://hdtoday.sc/?s={q}",
+      "https://hdtoday.sc/search?keyword={q}"
+    ],
+    "parser": "flixer",
+    "search": "https://hdtoday24.at/search/{q}",
+    "enabled": true,
+    "verified": true,
+    "note": "ok · 3/3 queries",
+    "latencyMs": 3163,
+    "lastChecked": "2026-10-28T23:00:47.030Z",
+    "sample": [
+      "Inception",
+      "Inception",
+      "The Matrix",
+      "The Matrix Reloaded",
+      "Breaking Bad"
+    ]
+  },
+  {
+    "id": "movish",
+    "name": "Movish",
+    "url": "https://movish.to/home",
+    "origin": "https://movish.to",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://movish.to/search/{q}",
+      "https://movish.to/search?q={q}",
+      "https://movish.to/?s={q}",
+      "https://movish.to/search?keyword={q}"
+    ],
+    "parser": "generic",
+    "search": "https://movish.to/search/{q}",
+    "enabled": true,
+    "verified": true,
+    "note": "ok · 3/3 queries",
+    "latencyMs": 1202,
+    "lastChecked": "2026-10-28T23:00:47.030Z",
+    "sample": [
+      "Inception: The Cobol Job",
+      "Inception",
+      "The Matrix Revolutions Revisited",
+      "The Matrix Reloaded Revisited",
+      "No Half Measures: Creating the Final Season of Breaking Bad"
+    ]
+  },
+  {
+    "id": "mooplay",
+    "name": "MooPlay",
+    "url": "https://ww1.mooplay.cc",
+    "origin": "https://ww1.mooplay.cc",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://mooplay.cc/search/{q}",
+      "https://mooplay.cc/search?q={q}",
+      "https://mooplay.cc/?s={q}",
+      "https://mooplay.cc/search?keyword={q}"
+    ],
+    "parser": "generic",
+    "search": "https://ww1.mooplay.cc/?s={q}",
+    "enabled": true,
+    "verified": true,
+    "note": "ok · 3/3 queries",
+    "lastChecked": "2026-10-28T23:00:47.030Z",
+    "latencyMs": 800,
+    "sample": [
+      "Inception",
+      "Inception: The Cobol Job",
+      "The Matrix Resurrections",
+      "A Glitch in the Matrix",
+      "Breaking Bad"
+    ]
+  },
+  {
+    "id": "boredflix",
+    "name": "BoredFlix",
+    "url": "https://boredflix.to",
+    "origin": "https://boredflix.to",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://boredflix.to/search/{q}",
+      "https://boredflix.to/search?q={q}",
+      "https://boredflix.to/?s={q}",
+      "https://boredflix.to/search?keyword={q}"
+    ],
+    "parser": "generic",
+    "search": "https://boredflix.to/search/{q}",
+    "enabled": true,
+    "verified": true,
+    "note": "ok · 3/3 queries",
+    "latencyMs": 1356,
+    "lastChecked": "2026-10-28T23:00:47.030Z",
+    "sample": [
+      "Inception",
+      "Bikini Inception",
+      "The Matrix",
+      "The Matrix Reloaded",
+      "Breaking Bad"
+    ]
+  },
+  {
+    "id": "noxx",
+    "name": "NOXX",
+    "url": "https://noxx.gg",
+    "origin": "https://noxx.gg",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://noxx.gg/search/{q}",
+      "https://noxx.gg/search?q={q}",
+      "https://noxx.gg/?s={q}",
+      "https://noxx.gg/search?keyword={q}"
+    ],
+    "parser": "auto",
+    "search": null,
+    "enabled": false,
+    "verified": false,
+    "note": "http 404",
+    "lastChecked": "2026-10-28T22:19:07.668Z"
+  },
+  {
+    "id": "azmovies",
+    "name": "AZMovies",
+    "url": "https://azmovies.to",
+    "origin": "https://azmovies.to",
+    "kind": "stream",
+    "searchTemplates": [
+      "https://azmovies.to/search/{q}",
+      "https://azmovies.to/search?q={q}",
+      "https://azmovies.to/?s={q}",
+      "https://azmovies.to/search?keyword={q}"
+    ],
+    "parser": "auto",
+    "search": null,
+    "enabled": false,
+    "verified": false,
+    "note": "http 404",
+    "lastChecked": "2026-10-28T22:19:07.668Z"
+  }
+]

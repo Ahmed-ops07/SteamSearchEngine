@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>StreamFinder — search every free movie site at once</title>
+  <meta name="description" content="One search across the best free movie and TV streaming sites. Find where a title is available and jump straight to it.">
+  <meta name="theme-color" content="#07070a">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230b0b10'/%3E%3Cpath d='M25 18l22 14-22 14z' fill='%23ff4d6d'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/styles.css?v=7">
+</head>
+<body>
+  <div class="aurora" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="StreamFinder home">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M8 5.5v13l10-6.5-10-6.5Z" fill="currentColor"/></svg>
+      </span>
+      <span class="brand-text">Stream<span>Finder</span></span>
+    </a>
+    <div class="topbar-actions">
+      <button class="ghost-btn" id="sourcesBtn" type="button">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <span class="hide-sm">All sources</span>
+        <span class="pill" id="sourceCount">52</span>
+      </button>
+      <a class="ghost-btn" href="https://www.bestfreestreaming.org/" target="_blank" rel="noopener noreferrer">
+        <span class="hide-sm">Source list</span>
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 5h5v5M19 5l-7 7M18 14v4a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="hero">
+      <p class="eyebrow"><span class="live-dot"></span> One query · every site · zero accounts</p>
+      <h1>Find any movie.<br><span class="grad">Every site at once.</span></h1>
+      <p class="lede">StreamFinder searches the search pages of <strong id="heroCount">52</strong> free movie &amp; TV sites in parallel, then shows you every place a title is available.</p>
+
+      <form id="searchForm" class="searchbar" role="search" autocomplete="off">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <input id="q" name="q" type="search" placeholder="Search movies, TV shows, anything…" aria-label="Search movies and TV shows" maxlength="80" spellcheck="false" enterkeyhint="search">
+        <button class="clear-btn" id="clearBtn" type="button" aria-label="Clear search" hidden>
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+        <button class="search-btn" type="submit">Search</button>
+      </form>
+
+      <div class="quick" id="quickRow">
+        <span class="quick-label">Try</span>
+        <button type="button" data-q="The Matrix">The Matrix</button>
+        <button type="button" data-q="Inception">Inception</button>
+        <button type="button" data-q="Breaking Bad">Breaking Bad</button>
+        <button type="button" data-q="Dune">Dune</button>
+        <button type="button" data-q="The Office">The Office</button>
+      </div>
+
+      <div class="recent" id="recentRow" hidden>
+        <span class="quick-label">Recent</span>
+        <div class="recent-list" id="recentList"></div>
+      </div>
+    </section>
+
+    <section class="toolbar" id="toolbar" hidden>
+      <div class="toolbar-left">
+        <div class="segmented" id="typeFilter" role="group" aria-label="Filter by type">
+          <button type="button" class="seg active" data-type="all" aria-pressed="true">All</button>
+          <button type="button" class="seg" data-type="movie" aria-pressed="false">Movies</button>
+          <button type="button" class="seg" data-type="tv" aria-pressed="false">TV</button>
+        </div>
+        <label class="switch" title="Merge the same title found on multiple sites">
+          <input type="checkbox" id="groupToggle" checked>
+          <span class="track" aria-hidden="true"></span>
+          Group by title
+        </label>
+        <label class="switch" title="Also query sites that render results with JavaScript (slower)">
+          <input type="checkbox" id="tryAllToggle">
+          <span class="track" aria-hidden="true"></span>
+          Try all sites
+        </label>
+      </div>
+      <div class="toolbar-right">
+        <label class="select-wrap">
+          <span>Sort</span>
+          <select id="sortSelect">
+            <option value="sources">Most sources</option>
+            <option value="relevance">Relevance</option>
+            <option value="year">Newest</option>
+            <option value="title">A–Z</option>
+          </select>
+        </label>
+      </div>
+    </section>
+
+    <section class="source-strip" id="sourceStrip" hidden aria-label="Source status and filters"></section>
+
+    <div class="status-line" id="statusLine" hidden>
+      <p id="statusText"></p>
+      <button type="button" class="text-btn" id="clearFiltersBtn" hidden>Clear source filters</button>
+    </div>
+
+    <h2 class="sr-only" id="resultsHeading">Search results</h2>
+    <section class="results" id="results" aria-live="polite" aria-labelledby="resultsHeading"></section>
+
+    <section class="empty" id="empty" hidden>
+      <div class="empty-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+      <h2 id="emptyTitle">No matches</h2>
+      <p id="emptyText">Try a shorter title, check the spelling, or enable “Try all sites”.</p>
+      <div class="empty-actions">
+        <button type="button" class="primary-btn" id="emptyRetry">Search again</button>
+        <button type="button" class="ghost-btn" id="emptyTryAll">Try all sites</button>
+      </div>
+    </section>
+
+    <section class="error-panel" id="errorPanel" hidden>
+      <h2>Something went wrong</h2>
+      <p id="errorText"></p>
+      <button type="button" class="primary-btn" id="errorRetry">Retry</button>
+    </section>
+
+    <section class="manual-section" id="manualSection" hidden>
+      <div class="section-head">
+        <div>
+          <h2>Search directly on these sites</h2>
+          <p>These sites build their results in the browser, so open their own search for the same query.</p>
+        </div>
+        <button type="button" class="text-btn" id="manualToggle" hidden>Show all</button>
+      </div>
+      <div class="manual-grid" id="manualGrid"></div>
+    </section>
+
+    <section class="sites-section" id="sitesSection">
+      <div class="section-head">
+        <div>
+          <h2>Every site in the index</h2>
+          <p id="sitesSub">Curated by BestFreeStreaming · status updates after each search</p>
+        </div>
+        <button type="button" class="ghost-btn" id="refreshSourcesBtn">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 5v6h-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Refresh
+        </button>
+      </div>
+      <div class="sites-grid" id="sitesGrid"></div>
+    </section>
+
+    <section class="notice">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 8v5m0 3.5v.1M10.3 4.5 3.5 17a2 2 0 0 0 1.7 3h13.6a2 2 0 0 0 1.7-3L13.7 4.5a2 2 0 0 0-3.4 0Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      <p><strong>Heads up:</strong> StreamFinder indexes public search pages and links out — it never hosts or streams video. These third-party sites run ads, so use an ad-blocker. Availability and legality vary by country; check your local rules.</p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span>StreamFinder</span>
+    <span class="footer-dot"></span>
+    <span>Built on the 2026 list from <a href="https://www.bestfreestreaming.org/" target="_blank" rel="noopener noreferrer">BestFreeStreaming</a></span>
+    <span class="footer-dot"></span>
+    <span id="footerStats">52 sources</span>
+  </footer>
+
+  <dialog id="sourcesDialog" class="dialog">
+    <div class="dialog-head">
+      <div>
+        <h2>Sources</h2>
+        <p id="dialogSub">52 curated free streaming sites</p>
+      </div>
+      <button type="button" class="icon-btn" id="dialogClose" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="dialog-legend">
+      <span><i class="dot ok"></i> Live search</span>
+      <span><i class="dot manual"></i> Open on site</span>
+      <span><i class="dot bad"></i> Blocked / down</span>
+    </div>
+    <div class="dialog-list" id="dialogList"></div>
+  </dialog>
+
+  <script src="/app.js?v=7"></script>
+</body>
+</html>

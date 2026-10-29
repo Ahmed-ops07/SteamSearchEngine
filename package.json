@@ -1,0 +1,16 @@
+{
+  "name": "streamfinder",
+  "version": "1.0.0",
+  "private": true,
+  "description": "One search across the 2026 BestFreeStreaming list of free movie and TV sites.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "audit": "node scripts/audit-sources.js",
+    "probe": "node scripts/probe-sources.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
