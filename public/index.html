@@ -103,49 +103,6 @@
     <h2 class="sr-only" id="resultsHeading">Search results</h2>
     <section class="results" id="results" aria-live="polite" aria-labelledby="resultsHeading"></section>
 
-    <section class="empty" id="empty" hidden>
-      <div class="empty-icon" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-      </div>
-      <h2 id="emptyTitle">No matches</h2>
-      <p id="emptyText">Try a shorter title, check the spelling, or enable “Try all sites”.</p>
-      <div class="empty-actions">
-        <button type="button" class="primary-btn" id="emptyRetry">Search again</button>
-        <button type="button" class="ghost-btn" id="emptyTryAll">Try all sites</button>
-      </div>
-    </section>
-
-    <section class="error-panel" id="errorPanel" hidden>
-      <h2>Something went wrong</h2>
-      <p id="errorText"></p>
-      <button type="button" class="primary-btn" id="errorRetry">Retry</button>
-    </section>
-
-    <section class="manual-section" id="manualSection" hidden>
-      <div class="section-head">
-        <div>
-          <h2>Search directly on these sites</h2>
-          <p>These sites build their results in the browser, so open their own search for the same query.</p>
-        </div>
-        <button type="button" class="text-btn" id="manualToggle" hidden>Show all</button>
-      </div>
-      <div class="manual-grid" id="manualGrid"></div>
-    </section>
-
-    <section class="sites-section" id="sitesSection">
-      <div class="section-head">
-        <div>
-          <h2>Every site in the index</h2>
-          <p id="sitesSub">Curated by BestFreeStreaming · status updates after each search</p>
-        </div>
-        <button type="button" class="ghost-btn" id="refreshSourcesBtn">
-          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 5v6h-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Refresh
-        </button>
-      </div>
-      <div class="sites-grid" id="sitesGrid"></div>
-    </section>
-
     <section class="notice">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 8v5m0 3.5v.1M10.3 4.5 3.5 17a2 2 0 0 0 1.7 3h13.6a2 2 0 0 0 1.7-3L13.7 4.5a2 2 0 0 0-3.4 0Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
       <p><strong>Heads up:</strong> StreamFinder indexes public search pages and links out — it never hosts or streams video. These third-party sites run ads, so use an ad-blocker. Availability and legality vary by country; check your local rules.</p>
@@ -153,7 +110,7 @@
   </main>
 
   <footer class="footer">
-    <span>StreamFinder</span>
+    <span>StreamFinder by Dr. Ahmed Sobhy</span>
     <span class="footer-dot"></span>
     <span>Built on the 2026 list from <a href="https://www.bestfreestreaming.org/" target="_blank" rel="noopener noreferrer">BestFreeStreaming</a></span>
     <span class="footer-dot"></span>
@@ -178,6 +135,6 @@
     <div class="dialog-list" id="dialogList"></div>
   </dialog>
 
-  <script src="/app.js?v=9"></script>
+  <script src="/app.js?v=11"></script>
 </body>
 </html>

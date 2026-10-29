@@ -26,8 +26,7 @@
     runtime: 'node',
     batchSearch: false,
     sourcesPromise: null,
-    abort: null,
-    manualExpanded: false
+    abort: null
   };
 
   const els = {
@@ -47,19 +46,6 @@
     statusText: $('#statusText'),
     clearFilters: $('#clearFiltersBtn'),
     results: $('#results'),
-    empty: $('#empty'),
-    emptyTitle: $('#emptyTitle'),
-    emptyText: $('#emptyText'),
-    emptyRetry: $('#emptyRetry'),
-    emptyTryAll: $('#emptyTryAll'),
-    errorPanel: $('#errorPanel'),
-    errorText: $('#errorText'),
-    errorRetry: $('#errorRetry'),
-    manual: $('#manualSection'),
-    manualGrid: $('#manualGrid'),
-    manualToggle: $('#manualToggle'),
-    sitesGrid: $('#sitesGrid'),
-    sitesSub: $('#sitesSub'),
     sourcesBtn: $('#sourcesBtn'),
     dialog: $('#sourcesDialog'),
     dialogClose: $('#dialogClose'),
@@ -68,7 +54,6 @@
     sourceCount: $('#sourceCount'),
     heroCount: $('#heroCount'),
     footerStats: $('#footerStats'),
-    refreshSources: $('#refreshSourcesBtn'),
     topbar: $('.topbar')
   };
 
@@ -194,30 +179,10 @@
       renderSourceStrip();
     });
 
-    els.emptyRetry.addEventListener('click', () => runSearch(state.query, { force: true }));
-    els.emptyTryAll.addEventListener('click', () => {
-      state.tryAll = true;
-      els.tryAllToggle.checked = true;
-      try { localStorage.setItem(LS_TRY_ALL, '1'); } catch {}
-      runSearch(state.query, { force: true });
-    });
-    els.errorRetry.addEventListener('click', () => runSearch(state.query, { force: true }));
-
-    els.manualToggle.addEventListener('click', () => {
-      state.manualExpanded = !state.manualExpanded;
-      renderManual();
-    });
-
     els.sourcesBtn.addEventListener('click', openDialog);
     els.dialogClose.addEventListener('click', () => els.dialog.close());
     els.dialog.addEventListener('click', e => {
       if (e.target === els.dialog) els.dialog.close();
-    });
-
-    els.refreshSources.addEventListener('click', async () => {
-      els.refreshSources.disabled = true;
-      await loadSources();
-      els.refreshSources.disabled = false;
     });
 
     window.addEventListener('popstate', () => {
@@ -253,10 +218,9 @@
       els.heroCount.textContent = state.allSources.length;
       els.footerStats.textContent = `${state.allSources.length} sources indexed`;
       els.dialogSub.textContent = `${state.allSources.length} curated free streaming sites`;
-      renderSites();
       renderDialog();
     } catch (e) {
-      els.sitesSub.textContent = 'Could not load the source list. Is the local server running?';
+      els.footerStats.textContent = 'Could not load sources';
     }
   }
 
@@ -272,39 +236,6 @@
       ok: 'Live search', empty: 'No results', blocked: 'Blocked', timeout: 'Timed out',
       error: 'Error', manual: 'Open on site', pending: 'Checking'
     })[status] || 'Not checked';
-  }
-
-  function renderSites() {
-    const grid = els.sitesGrid;
-    grid.textContent = '';
-    for (const src of state.allSources) {
-      if (src.kind !== 'stream' && src.kind !== 'link') continue;
-      const status = state.statusById.get(src.id) || 'manual';
-      const a = document.createElement('a');
-      a.className = 'site-card';
-      a.href = src.url;
-      a.target = '_blank';
-      a.rel = 'noopener noreferrer';
-      a.title = `${src.name} — ${statusLabel(status)}`;
-
-      const dot = document.createElement('i');
-      dot.className = 'dot ' + statusDotClass(status);
-      const info = document.createElement('span');
-      info.className = 'site-info';
-      const name = document.createElement('span');
-      name.className = 'site-name';
-      name.textContent = src.name;
-      const host = document.createElement('span');
-      host.className = 'site-host';
-      host.textContent = src.host || src.url;
-      info.append(name, host);
-      const icon = document.createElement('span');
-      icon.innerHTML = ICON.external;
-      a.append(dot, info, icon.firstElementChild);
-      grid.append(a);
-    }
-    const live = state.allSources.filter(s => s.verified).length;
-    els.sitesSub.textContent = `${live} sites support live search · ${state.allSources.length - live} open directly · status updates after each search`;
   }
 
   function openDialog() {
@@ -471,7 +402,6 @@
     state.cached = false;
     state.hiddenSources.clear();
     state.expanded.clear();
-    state.manualExpanded = false;
 
     els.q.value = q;
     els.clear.hidden = false;
@@ -511,7 +441,6 @@
       state.loading = false;
       state.statusById = new Map(state.sources.map(s => [s.id, s.status]));
       renderAll();
-      renderSites();
       renderDialog();
     } catch (e) {
       if (e.name === 'AbortError' || state.query !== q) return;
@@ -535,7 +464,6 @@
     history.pushState({}, '', location.pathname);
     document.title = 'StreamFinder — search every free movie site at once';
     renderAll();
-    renderSites();
   }
 
   /* ---------------- rendering ---------------- */
@@ -546,30 +474,24 @@
     els.quick.hidden = hasQuery;
     els.recent.hidden = hasQuery || readRecent().length === 0;
     els.toolbar.hidden = !hasQuery;
-    els.errorPanel.hidden = !state.error;
 
     if (state.error) {
-      els.errorText.textContent = state.error;
       els.results.textContent = '';
-      els.empty.hidden = true;
       els.strip.hidden = true;
-      els.statusLine.hidden = true;
-      els.manual.hidden = true;
+      els.statusLine.hidden = false;
+      els.statusText.textContent = 'Search failed. Please try again.';
+      els.clearFilters.hidden = true;
       return;
     }
 
     if (!hasQuery) {
       els.results.textContent = '';
-      els.empty.hidden = true;
       els.strip.hidden = true;
       els.statusLine.hidden = true;
-      els.manual.hidden = true;
       return;
     }
 
     if (state.loading) {
-      els.empty.hidden = true;
-      els.manual.hidden = true;
       els.strip.hidden = true;
       els.statusLine.hidden = false;
       const liveCount = state.allSources.filter(s => s.verified).length;
@@ -586,17 +508,11 @@
     const sorted = sortGroups(groups);
 
     renderSourceStrip();
-    renderManual();
     renderStatus(visible);
 
-    els.empty.hidden = sorted.length > 0;
-    if (!sorted.length) {
-      renderEmptyState(visible.length);
-      els.results.textContent = '';
-      return;
-    }
-
     els.results.textContent = '';
+    if (!sorted.length) return;
+
     const frag = document.createDocumentFragment();
     sorted.forEach((group, i) => frag.append(renderCard(group, i)));
     els.results.append(frag);
@@ -892,20 +808,17 @@
     const groups = state.group ? buildGroups(visible) : visible.map(toSingleGroup);
     const sorted = sortGroups(groups);
     renderStatus(visible);
-    els.empty.hidden = sorted.length > 0;
+    els.results.textContent = '';
     if (!sorted.length) {
-      els.results.textContent = '';
-      renderEmptyState(visible.length);
+      els.strip.hidden = false;
+      renderSourceStrip();
       return;
     }
-    els.results.textContent = '';
     const frag = document.createDocumentFragment();
     sorted.forEach((group, i) => frag.append(renderCard(group, i)));
     els.results.append(frag);
     els.strip.hidden = false;
-    els.manual.hidden = false;
     renderSourceStrip();
-    renderManual();
   }
 
   function renderStatus(visible) {
@@ -922,7 +835,7 @@
         els.statusText.innerHTML = `All <strong>${fmtCount(state.items.length)}</strong> results are hidden by the current filters`;
       } else {
         const answered = state.sources.filter(s => s.status === 'ok' || s.status === 'empty').length;
-        els.statusText.innerHTML = `No matches across <strong>${answered}</strong> ${plural(answered, 'live site', 'live sites')} · ${seconds}s${state.cached ? ' · cached' : ''}`;
+        els.statusText.innerHTML = `<strong>0</strong> results · <strong>${answered}</strong> ${plural(answered, 'live site', 'live sites')} checked · ${seconds}s${state.cached ? ' · cached' : ''}`;
       }
       return;
     }
@@ -934,36 +847,6 @@
     ];
     if (failures) parts.push(`${failures} unreachable`);
     els.statusText.innerHTML = parts.join(' · ');
-  }
-
-  function renderEmptyState(visibleCount) {
-    const filteredOut = state.items.length > 0 && visibleCount === 0;
-    els.empty.hidden = false;
-    if (filteredOut) {
-      els.emptyTitle.textContent = 'Nothing matches these filters';
-      els.emptyText.textContent = 'Every result is hidden by the type or source filters. Clear them to see the full list.';
-      els.emptyRetry.textContent = 'Clear filters';
-      els.emptyRetry.onclick = () => {
-        state.hiddenSources.clear();
-        state.type = 'all';
-        $$('.seg', els.typeFilter).forEach(b => {
-          const active = b.dataset.type === 'all';
-          b.classList.toggle('active', active);
-          b.setAttribute('aria-pressed', String(active));
-        });
-        renderResults();
-        renderSourceStrip();
-      };
-      els.emptyTryAll.hidden = true;
-    } else {
-      els.emptyTitle.textContent = `No matches for “${state.query}”`;
-      els.emptyText.textContent = state.tryAll
-        ? 'None of the sites returned a match. Try a shorter title or check the spelling.'
-        : 'The live sites did not return a match. Some sites render results in the browser — try enabling “Try all sites”, or use the direct search links below.';
-      els.emptyRetry.textContent = 'Search again';
-      els.emptyRetry.onclick = () => runSearch(state.query, { force: true });
-      els.emptyTryAll.hidden = state.tryAll;
-    }
   }
 
   function renderSourceStrip() {
@@ -1007,36 +890,6 @@
       }
       els.strip.append(btn);
     }
-  }
-
-  function renderManual() {
-    const manual = state.sources.filter(s =>
-      s.status === 'manual' || ['blocked', 'timeout', 'error'].includes(s.status)
-    );
-    if (!manual.length || !state.query) {
-      els.manual.hidden = true;
-      return;
-    }
-    els.manual.hidden = false;
-    els.manualGrid.textContent = '';
-    const limit = state.manualExpanded ? manual.length : 12;
-    manual.slice(0, limit).forEach(src => {
-      const a = document.createElement('a');
-      a.className = 'manual-link';
-      const fallback = state.allSources.find(s => s.id === src.id)?.url || '#';
-      a.href = src.hasSearch ? (src.searchUrl || fallback) : fallback;
-      a.target = '_blank';
-      a.rel = 'noopener noreferrer';
-      a.title = src.hasSearch ? `Search “${state.query}” on ${src.name}` : `Open ${src.name} (no direct search URL)`;
-      const name = document.createElement('span');
-      name.textContent = src.name;
-      const icon = document.createElement('span');
-      icon.innerHTML = ICON.external;
-      a.append(name, icon.firstElementChild);
-      els.manualGrid.append(a);
-    });
-    els.manualToggle.hidden = manual.length <= 12;
-    els.manualToggle.textContent = state.manualExpanded ? 'Show less' : `Show all ${manual.length}`;
   }
 
   /* ---------------- recent searches ---------------- */
