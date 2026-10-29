@@ -8,7 +8,9 @@
     "start": "node server.js",
     "dev": "node server.js",
     "audit": "node scripts/audit-sources.js",
-    "probe": "node scripts/probe-sources.js"
+    "probe": "node scripts/probe-sources.js",
+    "worker:dev": "npx wrangler dev",
+    "worker:deploy": "npx wrangler deploy"
   },
   "engines": {
     "node": ">=18"
