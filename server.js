@@ -11,7 +11,10 @@ const PORT = Number(process.env.PORT || 8790);
 const HOST = process.env.HOST || (process.env.NODE_ENV === 'production' ? '0.0.0.0' : '127.0.0.1');
 const ROOT = __dirname;
 const PUBLIC = path.join(ROOT, 'public');
-const DATA = path.join(ROOT, 'data', 'sources.json');
+const DATA_FILES = [
+  { file: path.join(ROOT, 'data', 'sources.json'), catalog: 'non-arabic' },
+  { file: path.join(ROOT, 'data', 'sources-ar.json'), catalog: 'arabic' }
+];
 
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
 const SOURCE_TIMEOUT = Number(process.env.SOURCE_TIMEOUT || 8500);
@@ -32,22 +35,44 @@ const MIME = {
 
 /* ---------------- source registry ---------------- */
 
-let sourceCache = { mtime: 0, list: [] };
+let sourceCache = { signature: '', list: [] };
 function loadSources() {
-  try {
-    const st = fs.statSync(DATA);
-    if (st.mtimeMs !== sourceCache.mtime) {
-      const parsed = JSON.parse(fs.readFileSync(DATA, 'utf8'));
-      if (!Array.isArray(parsed)) throw new Error('sources.json must be an array');
-      sourceCache = { mtime: st.mtimeMs, list: parsed };
-      console.log(`Loaded ${parsed.length} sources (${parsed.filter(s => s.verified).length} verified)`);
+  const signature = DATA_FILES.map(({ file }) => {
+    try { return `${file}:${fs.statSync(file).mtimeMs}`; }
+    catch { return `${file}:missing`; }
+  }).join('|');
+  if (signature === sourceCache.signature) return sourceCache.list;
+
+  const list = [];
+  for (const { file, catalog } of DATA_FILES) {
+    try {
+      const parsed = JSON.parse(fs.readFileSync(file, 'utf8').replace(/^\uFEFF/, ''));
+      if (!Array.isArray(parsed)) throw new Error(`${path.basename(file)} must be an array`);
+      list.push(...parsed.map(source => ({ ...source, catalog })));
+    } catch (e) {
+      console.error(`Could not load ${path.basename(file)}:`, e.message);
     }
-  } catch (e) {
-    console.error('Could not load sources.json:', e.message);
   }
-  return sourceCache.list;
+  sourceCache = { signature, list };
+  console.log(`Loaded ${list.length} sources (${list.filter(s => s.verified).length} verified)`);
+  return list;
 }
 loadSources();
+
+const CATALOGS = new Set(['non-arabic', 'arabic', 'both']);
+function normalizeCatalog(value) {
+  return CATALOGS.has(value) ? value : 'non-arabic';
+}
+function catalogSources(all, catalog) {
+  return catalog === 'both' ? all : all.filter(s => s.catalog === catalog);
+}
+function catalogCounts(all) {
+  return {
+    nonArabic: all.filter(s => s.catalog === 'non-arabic').length,
+    arabic: all.filter(s => s.catalog === 'arabic').length,
+    both: all.length
+  };
+}
 
 /* ---------------- tiny concurrency pool ---------------- */
 
@@ -86,14 +111,14 @@ function statusFromError(e) {
   return 'error';
 }
 
-async function fetchSearchPage(url, timeoutMs, wantsJson) {
+async function fetchSearchPage(url, timeoutMs, wantsJson, language) {
   const res = await fetch(url, {
     redirect: 'follow',
     signal: AbortSignal.timeout(timeoutMs),
     headers: {
       'user-agent': UA,
       accept: wantsJson ? 'application/json,text/plain;q=0.9,*/*;q=0.8' : 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-      'accept-language': 'en-US,en;q=0.9',
+      'accept-language': language === 'ar' ? 'ar,en;q=0.8' : 'en-US,en;q=0.9',
       'cache-control': 'no-cache'
     }
   });
@@ -130,7 +155,7 @@ async function runSourceSearch(source, query, timeoutMs) {
   };
   try {
     const wantsJson = source.parser === 'json';
-    const { text, finalUrl } = await fetchSearchPage(searchUrl, timeoutMs, wantsJson);
+    const { text, finalUrl } = await fetchSearchPage(searchUrl, timeoutMs, wantsJson, source.language);
     let items = [];
     let parser = wantsJson ? 'json' : 'none';
     if (wantsJson) {
@@ -182,9 +207,11 @@ async function handleSearch(params, res) {
 
   const tryAll = params.get('tryAll') === '1';
   const batch = params.get('batch') === '1';
+  const catalog = normalizeCatalog(params.get('catalog'));
   const all = loadSources();
-  const selected = selectSources(all, params);
-  const cacheKey = `${q.toLowerCase()}|${selected.map(s => s.id).join(',')}|${tryAll}|${batch ? 'b' : 'f'}`;
+  const inCatalog = catalogSources(all, catalog);
+  const selected = selectSources(inCatalog, params);
+  const cacheKey = `${q.toLowerCase()}|${catalog}|${selected.map(s => s.id).join(',')}|${tryAll}|${batch ? 'b' : 'f'}`;
   const noCache = params.get('nocache') === '1';
   const cached = noCache ? null : cacheGet(cacheKey);
   if (cached) return sendJson(res, 200, { ...cached, cached: true });
@@ -205,7 +232,7 @@ async function handleSearch(params, res) {
   // direct "search on site" link so every site in the list is one click away.
   // Batched calls leave this to the browser so payloads stay small.
   if (!batch) {
-    for (const s of all) {
+    for (const s of inCatalog) {
       if (s.kind !== 'stream' || statuses.some(x => x.id === s.id)) continue;
       const manualSearchUrl = siteSearchUrlFor(s, q);
       statuses.push({ id: s.id, name: s.name, host: safeHost(s.origin || s.url), status: 'manual', count: 0, ms: 0, searchUrl: manualSearchUrl || s.url, hasSearch: !!manualSearchUrl, manual: true, error: '' });
@@ -217,6 +244,7 @@ async function handleSearch(params, res) {
 
   const payload = {
     query: q,
+    catalog,
     tookMs: Date.now() - started,
     total: items.length,
     results: items,
@@ -236,10 +264,17 @@ async function handleSearch(params, res) {
 
 function handleSources(res) {
   const list = loadSources();
+  const counts = catalogCounts(list);
   return sendJson(res, 200, {
     runtime: 'node',
+    catalogs: [
+      { id: 'non-arabic', label: 'Non Arabic Sites', count: counts.nonArabic },
+      { id: 'arabic', label: 'Arabic Sites', count: counts.arabic },
+      { id: 'both', label: 'Both', count: counts.both }
+    ],
     sources: list.map(s => ({
       id: s.id, name: s.name, url: s.url, host: safeHost(s.origin || s.url),
+      catalog: s.catalog, language: s.language || 'en',
       verified: !!s.verified, enabled: s.enabled !== false, kind: s.kind,
       searchUrl: s.siteSearch || (s.parser === 'json' ? null : s.search), note: s.note || '', latencyMs: s.latencyMs || null
     }))
@@ -248,9 +283,11 @@ function handleSources(res) {
 
 function handleHealth(res) {
   const list = loadSources();
+  const counts = catalogCounts(list);
   return sendJson(res, 200, {
     ok: true, runtime: 'node', uptime: Math.round(process.uptime()),
     sources: list.length, verified: list.filter(s => s.verified).length,
+    catalogs: counts,
     cachedSearches: searchCache.size, cachedPosters: posterCache.size
   });
 }

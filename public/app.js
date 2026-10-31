@@ -5,6 +5,9 @@
   const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
   const LS_RECENT = 'sf:recent';
   const LS_TRY_ALL = 'sf:tryAll';
+  const LS_CATALOG = 'sf:catalog';
+  const CATALOG_IDS = new Set(['non-arabic', 'arabic', 'both']);
+  const CATALOG_LABELS = { 'non-arabic': 'Non Arabic Sites', arabic: 'Arabic Sites', both: 'Both' };
 
   const state = {
     query: '',
@@ -19,6 +22,7 @@
     sort: 'sources',
     group: true,
     tryAll: false,
+    catalog: 'non-arabic',
     hiddenSources: new Set(),
     expanded: new Set(),
     allSources: [],
@@ -40,6 +44,7 @@
     typeFilter: $('#typeFilter'),
     groupToggle: $('#groupToggle'),
     tryAllToggle: $('#tryAllToggle'),
+    catalog: $('#catalogSelect'),
     sort: $('#sortSelect'),
     strip: $('#sourceStrip'),
     statusLine: $('#statusLine'),
@@ -61,9 +66,9 @@
 
   function normalizeText(value) {
     return String(value || '')
-      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .normalize('NFKD').replace(/\p{M}/gu, '')
       .toLowerCase().replace(/&/g, ' and ')
-      .replace(/[^a-z0-9]+/g, ' ')
+      .replace(/[^\p{L}\p{N}]+/gu, ' ')
       .replace(/\s+/g, ' ').trim();
   }
   function titleKey(title) {
@@ -88,6 +93,8 @@
     bindEvents();
     try { state.tryAll = localStorage.getItem(LS_TRY_ALL) === '1'; } catch {}
     els.tryAllToggle.checked = state.tryAll;
+    state.catalog = readCatalog();
+    els.catalog.value = state.catalog;
     renderRecent();
     state.sourcesPromise = loadSources();
     window.addEventListener('scroll', () => {
@@ -99,6 +106,43 @@
       els.q.value = initial;
       runSearch(initial);
     }
+  }
+
+  function normalizeCatalog(value) {
+    return CATALOG_IDS.has(value) ? value : 'non-arabic';
+  }
+
+  function readCatalog() {
+    const params = new URLSearchParams(location.search);
+    const fromUrl = params.get('catalog');
+    if (fromUrl) return normalizeCatalog(fromUrl);
+    // A shared search link without a catalog keeps the original English list.
+    if (params.get('q')) return 'non-arabic';
+    try { return normalizeCatalog(localStorage.getItem(LS_CATALOG)); } catch { return 'non-arabic'; }
+  }
+
+  function saveCatalog() {
+    try { localStorage.setItem(LS_CATALOG, state.catalog); } catch {}
+  }
+
+  function currentSources() {
+    return state.allSources.filter(src => state.catalog === 'both' || src.catalog === state.catalog);
+  }
+
+  function currentStreamSources() {
+    return currentSources().filter(src => src.kind === 'stream');
+  }
+
+  function updateCatalogUi() {
+    const active = currentSources();
+    const total = state.allSources.length;
+    els.sourceCount.textContent = active.length;
+    els.heroCount.textContent = active.length;
+    els.footerStats.textContent = `${total} sources indexed`;
+    if (state.catalog === 'arabic') els.dialogSub.textContent = `${active.length} Arabic sites from re-3arabi`;
+    else if (state.catalog === 'both') els.dialogSub.textContent = `${active.length} sites from both catalogs`;
+    else els.dialogSub.textContent = `${active.length} curated non-Arabic sites`;
+    els.catalog.setAttribute('aria-label', `Choose site list — ${CATALOG_LABELS[state.catalog]}`);
   }
 
   function bindEvents() {
@@ -157,6 +201,16 @@
       if (state.query) runSearch(state.query);
     });
 
+    els.catalog.addEventListener('change', () => {
+      state.catalog = normalizeCatalog(els.catalog.value);
+      saveCatalog();
+      state.hiddenSources.clear();
+      updateCatalogUi();
+      renderDialog();
+      if (state.query) runSearch(state.query);
+      else renderAll();
+    });
+
     els.sort.addEventListener('change', () => {
       state.sort = els.sort.value;
       renderResults();
@@ -186,9 +240,17 @@
     });
 
     window.addEventListener('popstate', () => {
-      const q = cleanQuery(new URLSearchParams(location.search).get('q'));
+      const params = new URLSearchParams(location.search);
+      const catalog = normalizeCatalog(params.get('catalog') || state.catalog);
+      if (catalog !== state.catalog) {
+        state.catalog = catalog;
+        els.catalog.value = catalog;
+        saveCatalog();
+        updateCatalogUi();
+      }
+      const q = cleanQuery(params.get('q'));
       if (q) { els.q.value = q; runSearch(q, { skipHistory: true }); }
-      else resetToHome();
+      else resetToHome({ skipHistory: true });
     });
 
     document.addEventListener('keydown', e => {
@@ -214,10 +276,7 @@
       state.runtime = data.runtime || 'node';
       state.batchSearch = state.runtime === 'cloudflare-worker';
       state.allSources = data.sources || [];
-      els.sourceCount.textContent = state.allSources.length;
-      els.heroCount.textContent = state.allSources.length;
-      els.footerStats.textContent = `${state.allSources.length} sources indexed`;
-      els.dialogSub.textContent = `${state.allSources.length} curated free streaming sites`;
+      updateCatalogUi();
       renderDialog();
     } catch (e) {
       els.footerStats.textContent = 'Could not load sources';
@@ -248,7 +307,7 @@
     const list = els.dialogList;
     list.textContent = '';
     const q = state.query;
-    for (const src of state.allSources) {
+    for (const src of currentSources()) {
       if (src.kind !== 'stream' && src.kind !== 'link') continue;
       const status = state.statusById.get(src.id) || 'manual';
       const row = document.createElement('div');
@@ -293,8 +352,8 @@
   /* ---------------- searching ---------------- */
 
   function searchSourceIds() {
-    return state.allSources
-      .filter(s => s.kind === 'stream' && (state.tryAll || s.verified))
+    return currentStreamSources()
+      .filter(s => state.tryAll || s.verified)
       .map(s => s.id);
   }
 
@@ -350,7 +409,7 @@
     let cached = batches.length > 0;
 
     await mapLimit(batches, 6, async batch => {
-      const endpoint = `/api/search?q=${encodeURIComponent(q)}&sources=${batch.join(',')}${state.tryAll ? '&tryAll=1' : ''}&batch=1${options.force ? '&nocache=1' : ''}`;
+      const endpoint = `/api/search?q=${encodeURIComponent(q)}&catalog=${state.catalog}&sources=${batch.join(',')}${state.tryAll ? '&tryAll=1' : ''}&batch=1${options.force ? '&nocache=1' : ''}`;
       try {
         const res = await fetch(endpoint, { signal: abort.signal, headers: { accept: 'application/json' } });
         const data = await res.json().catch(() => ({}));
@@ -372,8 +431,7 @@
 
     if (abort.signal.aborted || state.query !== q) return null;
 
-    const sources = state.allSources
-      .filter(src => src.kind === 'stream')
+    const sources = currentStreamSources()
       .map(src => statusById.get(src.id) || manualStatusFor(src, q));
     return {
       results: items,
@@ -407,8 +465,9 @@
     els.clear.hidden = false;
 
     if (!options.skipHistory) {
-      const url = `${location.pathname}?q=${encodeURIComponent(q)}`;
-      history.pushState({ q }, '', url);
+      const params = new URLSearchParams({ q });
+      if (state.catalog !== 'non-arabic') params.set('catalog', state.catalog);
+      history.pushState({ q, catalog: state.catalog }, '', `${location.pathname}?${params}`);
     }
     document.title = `${q} · StreamFinder`;
     saveRecent(q);
@@ -426,7 +485,7 @@
         data = await runBatchedSearch(q, abort, options);
         if (!data) return;
       } else {
-        const endpoint = `/api/search?q=${encodeURIComponent(q)}${state.tryAll ? '&tryAll=1' : ''}${options.force ? '&nocache=1' : ''}`;
+        const endpoint = `/api/search?q=${encodeURIComponent(q)}&catalog=${state.catalog}${state.tryAll ? '&tryAll=1' : ''}${options.force ? '&nocache=1' : ''}`;
         const res = await fetch(endpoint, { signal: abort.signal, headers: { accept: 'application/json' } });
         data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(data.error || `Search failed (${res.status})`);
@@ -450,7 +509,7 @@
     }
   }
 
-  function resetToHome() {
+  function resetToHome(options = {}) {
     if (state.abort) state.abort.abort();
     state.abort = null;
     state.query = '';
@@ -461,7 +520,7 @@
     state.error = '';
     state.hiddenSources.clear();
     state.statusById.clear();
-    history.pushState({}, '', location.pathname);
+    if (!options.skipHistory) history.pushState({}, '', location.pathname);
     document.title = 'StreamFinder — search every free movie site at once';
     renderAll();
   }
@@ -494,10 +553,15 @@
     if (state.loading) {
       els.strip.hidden = true;
       els.statusLine.hidden = false;
-      const liveCount = state.allSources.filter(s => s.verified).length;
-      const total = state.tryAll ? state.allSources.length : liveCount;
-      const label = total > 1 ? 'sites' : 'site';
-      els.statusText.innerHTML = `Searching <strong>${total || 'the'}</strong> ${state.tryAll ? label : 'live ' + label} for “<strong>${escapeHtml(state.query)}</strong>”…`;
+      const catalogStreams = currentStreamSources();
+      const liveCount = catalogStreams.filter(s => s.verified).length;
+      const total = state.tryAll ? catalogStreams.length : liveCount;
+      if (!total) {
+        els.statusText.innerHTML = `Searching live sites for “<strong>${escapeHtml(state.query)}</strong>”…`;
+      } else {
+        const label = total > 1 ? 'sites' : 'site';
+        els.statusText.innerHTML = `Searching <strong>${total}</strong> ${state.tryAll ? label : 'live ' + label} for “<strong>${escapeHtml(state.query)}</strong>”…`;
+      }
       els.clearFilters.hidden = true;
       renderSkeletons();
       return;

@@ -4,9 +4,16 @@
    Reuses the same parser, relevance and registry as the local Node server, but
    talks to the runtime's fetch/Request/Response APIs instead of node:http. */
 
-import sources from '../data/sources.json';
+import englishSources from '../data/sources.json';
+import arabicSources from '../data/sources-ar.json';
 import { parseResults, parseJsonResults, looksBlocked, looksLikeHtml } from '../lib/parse.js';
 import { isRelevant, sanitizeItem, searchUrlFor, safeHost } from '../lib/search.js';
+
+const sourceGroups = [
+  { id: 'non-arabic', label: 'Non Arabic Sites', sources: englishSources.map(s => ({ ...s, catalog: 'non-arabic' })) },
+  { id: 'arabic', label: 'Arabic Sites', sources: arabicSources.map(s => ({ ...s, catalog: 'arabic' })) }
+];
+const sources = sourceGroups.flatMap(group => group.sources);
 
 let startedAt = 0;
 const SOURCE_TIMEOUT = 8500;
@@ -58,13 +65,13 @@ function statusFromError(e) {
   return 'error';
 }
 
-async function fetchSearchPage(url, timeoutMs, wantsJson) {
+async function fetchSearchPage(url, timeoutMs, wantsJson, language) {
   const res = await fetchWithTimeout(url, {
     redirect: 'follow',
     headers: {
       'user-agent': UA,
       accept: wantsJson ? 'application/json,text/plain;q=0.9,*/*;q=0.8' : 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-      'accept-language': 'en-US,en;q=0.9',
+      'accept-language': language === 'ar' ? 'ar,en;q=0.8' : 'en-US,en;q=0.9',
       'cache-control': 'no-cache'
     }
   }, timeoutMs);
@@ -99,7 +106,7 @@ async function runSourceSearch(source, query, timeoutMs) {
   };
   try {
     const wantsJson = source.parser === 'json';
-    const { text, finalUrl } = await fetchSearchPage(searchUrl, timeoutMs, wantsJson);
+    const { text, finalUrl } = await fetchSearchPage(searchUrl, timeoutMs, wantsJson, source.language);
     let items = [];
     let parser = wantsJson ? 'json' : 'none';
     if (wantsJson) {
@@ -132,10 +139,25 @@ async function runSourceSearch(source, query, timeoutMs) {
   }
 }
 
-function selectSources(url) {
+const CATALOGS = new Set(['non-arabic', 'arabic', 'both']);
+function normalizeCatalog(value) {
+  return CATALOGS.has(value) ? value : 'non-arabic';
+}
+function catalogSources(all, catalog) {
+  return catalog === 'both' ? all : all.filter(s => s.catalog === catalog);
+}
+function catalogCounts() {
+  return {
+    nonArabic: sources.filter(s => s.catalog === 'non-arabic').length,
+    arabic: sources.filter(s => s.catalog === 'arabic').length,
+    both: sources.length
+  };
+}
+
+function selectSources(all, url) {
   const ids = new Set(String(url.searchParams.get('sources') || '').split(',').map(s => s.trim()).filter(Boolean));
   const tryAll = url.searchParams.get('tryAll') === '1' || url.searchParams.get('tryAll') === 'true';
-  return sources
+  return all
     .filter(s => s.kind === 'stream')
     .filter(s => (ids.size ? ids.has(s.id) : true))
     .filter(s => tryAll ? true : s.verified && s.enabled !== false);
@@ -148,8 +170,10 @@ async function handleSearch(url) {
 
   const tryAll = url.searchParams.get('tryAll') === '1';
   const batch = url.searchParams.get('batch') === '1';
-  const selected = selectSources(url);
-  const cacheKey = `${q.toLowerCase()}|${selected.map(s => s.id).join(',')}|${tryAll}|${batch ? 'b' : 'f'}`;
+  const catalog = normalizeCatalog(url.searchParams.get('catalog'));
+  const inCatalog = catalogSources(sources, catalog);
+  const selected = selectSources(inCatalog, url);
+  const cacheKey = `${q.toLowerCase()}|${catalog}|${selected.map(s => s.id).join(',')}|${tryAll}|${batch ? 'b' : 'f'}`;
   const noCache = url.searchParams.get('nocache') === '1';
   const cached = noCache ? null : cacheGet(cacheKey);
   if (cached) return json({ ...cached, cached: true });
@@ -167,7 +191,7 @@ async function handleSearch(url) {
   }
 
   if (!batch) {
-    for (const s of sources) {
+    for (const s of inCatalog) {
       if (s.kind !== 'stream' || statuses.some(x => x.id === s.id)) continue;
       const manualSearchUrl = siteSearchUrlFor(s, q);
       statuses.push({ id: s.id, name: s.name, host: safeHost(s.origin || s.url), status: 'manual', count: 0, ms: 0, searchUrl: manualSearchUrl || s.url, hasSearch: !!manualSearchUrl, manual: true, error: '' });
@@ -179,6 +203,7 @@ async function handleSearch(url) {
 
   const payload = {
     query: q,
+    catalog,
     tookMs: Date.now() - started,
     total: items.length,
     results: items,
@@ -251,10 +276,17 @@ async function handlePoster(url) {
 }
 
 function handleSources() {
+  const counts = catalogCounts();
   return json({
     runtime: 'cloudflare-worker',
+    catalogs: [
+      { id: 'non-arabic', label: 'Non Arabic Sites', count: counts.nonArabic },
+      { id: 'arabic', label: 'Arabic Sites', count: counts.arabic },
+      { id: 'both', label: 'Both', count: counts.both }
+    ],
     sources: sources.map(s => ({
       id: s.id, name: s.name, url: s.url, host: safeHost(s.origin || s.url),
+      catalog: s.catalog, language: s.language || 'en',
       verified: !!s.verified, enabled: s.enabled !== false, kind: s.kind,
       searchUrl: s.siteSearch || (s.parser === 'json' ? null : s.search), note: s.note || '', latencyMs: s.latencyMs || null
     }))
@@ -264,9 +296,11 @@ function handleSources() {
 function handleHealth() {
   const now = Date.now();
   if (!startedAt || startedAt > now) startedAt = now;
+  const counts = catalogCounts();
   return json({
     ok: true, runtime: 'cloudflare-worker', uptime: Math.round((now - startedAt) / 1000),
     sources: sources.length, verified: sources.filter(s => s.verified).length,
+    catalogs: counts,
     cachedSearches: searchCache.size, cachedPosters: posterCache.size
   });
 }

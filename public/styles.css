@@ -223,6 +223,26 @@ h1 {
 }
 .clear-btn:hover { background: rgba(255, 255, 255, 0.06); color: var(--text); }
 .clear-btn svg { width: 17px; height: 17px; }
+.catalog-wrap {
+  flex: 0 1 158px;
+  min-width: 112px;
+  height: 46px;
+}
+.catalog-wrap select {
+  width: 100%;
+  height: 100%;
+  padding: 0 30px 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--panel) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='m6 9 6 6 6-6' stroke='%239a9aab' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 10px center;
+  color: var(--text);
+  font-size: 12.5px;
+  font-weight: 650;
+  outline: none;
+  appearance: none;
+  cursor: pointer;
+}
+.catalog-wrap select:focus { border-color: rgba(139, 92, 246, 0.6); box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12); }
 .search-btn {
   flex: 0 0 auto;
   height: 46px;
@@ -650,7 +670,9 @@ h1 {
   .hide-sm { display: none; }
   main { padding: 0 16px; }
   .hero { padding-top: 36px; }
-  .searchbar { padding: 7px 7px 7px 14px; }
+  .searchbar { padding: 7px 7px 7px 14px; gap: 7px; }
+  .catalog-wrap { flex-basis: 132px; min-width: 104px; }
+  .catalog-wrap select { padding-left: 9px; font-size: 11.5px; }
   .search-btn { padding: 0 17px; }
   .quick { gap: 6px; }
   .toolbar { gap: 10px; }
@@ -662,6 +684,10 @@ h1 {
   .dialog-row .lat { display: none; }
 }
 @media (max-width: 430px) {
+  .search-icon { display: none; }
+  .searchbar { padding-left: 9px; gap: 5px; }
+  .catalog-wrap { flex-basis: 116px; min-width: 96px; }
+  .catalog-wrap select { padding-left: 7px; padding-right: 23px; font-size: 11px; background-position: right 7px center; }
   .search-btn { padding: 0 14px; font-size: 13.5px; }
   .results { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .badge { font-size: 9.5px; padding: 3px 6px; }

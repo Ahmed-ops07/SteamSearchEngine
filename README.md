@@ -2,9 +2,9 @@
 
 One query. Every site in the [2026 BestFreeStreaming list](https://www.bestfreestreaming.org/). No accounts, no video hosting, no nonsense.
 
-StreamFinder runs a search against the public search pages and APIs of the 52 sites in the list, merges duplicate titles across sources, and gives you a direct link to every place a movie or show was found. Sites that build results in the browser are still one click away through their own search page.
+StreamFinder runs a search against the public search pages and APIs of the 52 sites in the list, plus an optional 42-site Arabic list from [re-3arabi](https://github.com/Abodabodd/re-3arabi), merges duplicate titles across sources, and gives you a direct link to every place a movie or show was found. Sites that build results in the browser are still one click away through their own search page.
 
-![Node.js](https://img.shields.io/badge/Node.js-%E2%89%A518-3c873a) ![Dependencies](https://img.shields.io/badge/dependencies-0-blue) ![Sources](https://img.shields.io/badge/sources-52-ff4d6d)
+![Node.js](https://img.shields.io/badge/Node.js-%E2%89%A518-3c873a) ![Dependencies](https://img.shields.io/badge/dependencies-0-blue) ![Sources](https://img.shields.io/badge/sources-94-ff4d6d)
 
 ---
 
@@ -36,7 +36,7 @@ Requires Node.js 18 or newer (uses the built-in `fetch`). There is nothing to in
 
 ## What you get
 
-- **One search box, 17 live sources.** Searches run in parallel and usually finish in 3–6 seconds.
+- **One search box, 24 live sources.** The English list contributes 17 live-search sites and the Arabic list adds 7. Searches run in parallel and usually finish in 3–6 seconds.
 - **Merged results.** The same title found on many sites becomes one card with a source pill for each site, so you can pick the one that works for you.
 - **Honest coverage.** Sites that block scraping or render results with JavaScript are labeled *Open on site* and get a direct search link instead of fake results.
 - **Filters and sorting.** Movie/TV filter, source chips, grouping toggle, and sort by most sources, relevance, newest, or A–Z.
@@ -46,15 +46,17 @@ Requires Node.js 18 or newer (uses the built-in `fetch`). There is nothing to in
 
 ### Coverage at a glance
 
-| | Count |
-|---|---:|
-| Entries in the BestFreeStreaming list | **52** |
-| Sites with server-rendered search (live) | **17** |
-| Sites opened directly in your browser | **35** |
+| Catalog | Entries | Live search | Open on site |
+|---|---:|---:|---:|
+| Non Arabic Sites (BestFreeStreaming) | **52** | **17** | **35** |
+| Arabic Sites (re-3arabi) | **42** | **7** | **35** |
+| Both | **94** | **24** | **70** |
 
-Live-search sources: BingeBang, Zoechip, Reelix, Vexo, Nova, Cineruv, MovieNerds, Flixeo, HiMovies, MyFlixer, 2Flix, MoviesJoy, CornClick, HDToday, Movish, MooPlay, BoredFlix.
+Non-Arabic live-search sources: BingeBang, Zoechip, Reelix, Vexo, Nova, Cineruv, MovieNerds, Flixeo, HiMovies, MyFlixer, 2Flix, MoviesJoy, CornClick, HDToday, Movish, MooPlay, BoredFlix.
 
-The other 35 either return a bot challenge, render their results client-side, or only expose a homepage. StreamFinder still links to their search page (or homepage when no search route exists), so every entry in the list is one click away. The *Try all sites* toggle also asks the direct-only sites for results when you want to try harder.
+Arabic live-search sources: 5TV, Aflaam, CimaClub, Shahid4u, TopCinema, Tuktukcima, Tuniflix.
+
+The rest either return a bot challenge, render their results client-side, or only expose a homepage. StreamFinder still links to their search page (or homepage when no search route exists), so every entry in the list is one click away. The *Try all sites* toggle also asks the direct-only sites for results when you want to try harder.
 
 > Coverage changes constantly. Re-run the audit (below) if a site starts or stops working.
 
@@ -64,9 +66,10 @@ The other 35 either return a bot challenge, render their results client-side, or
 
 ```
 Browser
-  └─ GET /api/search?q=inception
+  └─ GET /api/search?q=inception&catalog=non-arabic
        └─ server.js
-            ├─ loadSources()          data/sources.json (hot-reloaded on change)
+            ├─ loadSources()          data/sources.json + data/sources-ar.json
+            ├─ filter by catalog      non-arabic | arabic | both
             ├─ select verified sources
             ├─ runSourceSearch() × N  pool of 8, 8.5 s timeout each
             │    ├─ fetch the site's search URL
@@ -77,7 +80,7 @@ Browser
             └─ JSON response (gzip, 4-minute cache)
 ```
 
-**Source registry.** `data/sources.json` is generated from the BestFreeStreaming page and then audited with three unrelated queries (`inception`, `the matrix`, `breaking bad`). A source only stays `verified` if at least two queries return genuinely relevant cards. Navigation links, logos, and unrelated “trending” cards are discarded by the relevance filter.
+**Source registries.** `data/sources.json` is generated from the BestFreeStreaming page and then audited with three unrelated queries (`inception`, `the matrix`, `breaking bad`). A source only stays `verified` if at least two queries return genuinely relevant cards. `data/sources-ar.json` contains the 42 usable sites from the re-3arabi plugin repository; only endpoints that returned relevant live results are marked `verified`, and the rest keep a direct on-site search link. Navigation links, logos, and unrelated “trending” cards are discarded by the relevance filter.
 
 **Parsers** (`lib/parse.js`)
 
@@ -85,7 +88,7 @@ Browser
 - `generic` — anchors with media-looking URLs plus nearby titles and posters, with JSON-LD fallback.
 - `json` — some sites expose a clean JSON search endpoint (BingeBang, Nova, Vexo, Cineruv, MovieNerds), which is faster and more reliable. For these, `siteSearch` keeps the “Search on site” link on the site itself instead of pointing at the API.
 
-**Relevance** (`lib/search.js`) normalizes punctuation and accents, ignores stopwords, and requires the long tokens of the query to appear in the title. This is what keeps “related” and “recommended” cards out of your results.
+**Relevance** (`lib/search.js`) uses Unicode-aware normalization, so Arabic titles survive lowercasing and punctuation cleanup. It ignores stopwords and requires the long tokens of the query to appear in the title. This is what keeps “related” and “recommended” cards out of your results.
 
 **Grouping** happens in the browser: titles are clustered by normalized title, then by year. A one-source year mismatch is treated as noise and folded in; two well-supported years are kept apart as likely remakes.
 
@@ -106,7 +109,8 @@ All responses are JSON except `/poster`.
 
 | Endpoint | Description |
 |---|---|
-| `GET /api/search?q=inception` | Search all verified sources. |
+| `GET /api/search?q=inception` | Search all verified sources in the default non-Arabic catalog. |
+| `GET /api/search?q=inception&catalog=arabic` | Search the Arabic catalog (`non-arabic`, `arabic`, or `both`). |
 | `GET /api/search?q=inception&tryAll=1` | Also query direct-only sites (slower). |
 | `GET /api/search?q=inception&nocache=1` | Bypass the search cache. |
 | `GET /api/search?q=inception&sources=bingebang,nova` | Limit to specific source IDs. |
@@ -120,6 +124,7 @@ Example response shape:
 ```json
 {
   "query": "inception",
+  "catalog": "non-arabic",
   "tookMs": 3100,
   "total": 118,
   "results": [
@@ -158,7 +163,8 @@ streamfinder/
 │  └─ index.js               Cloudflare Worker adapter: /api/* + /poster
 ├─ wrangler.toml             Cloudflare Worker + static asset config
 ├─ data/
-│  └─ sources.json           52-entry registry (hot-reloaded)
+│  ├─ sources.json           52-entry non-Arabic registry (hot-reloaded)
+│  └─ sources-ar.json        42-entry Arabic registry
 ├─ lib/
 │  ├─ parse.js               HTML / JSON-LD / JSON-API result parsers
 │  └─ search.js              relevance, normalization, URL helpers
@@ -276,7 +282,7 @@ To add a site manually:
 }
 ```
 
-Then run `npm run audit`.
+Then run `npm run audit`. Arabic entries live in `data/sources-ar.json`, use `ar-` IDs, and are served through `?catalog=arabic`; they are kept out of the BestFreeStreaming audit so the English registry can be regenerated safely.
 
 ---
 
@@ -291,4 +297,4 @@ Then run `npm run audit`.
 
 ---
 
-Built on the 2026 list from [BestFreeStreaming](https://www.bestfreestreaming.org/). Not affiliated with any of the indexed sites.
+Built on the 2026 list from [BestFreeStreaming](https://www.bestfreestreaming.org/), with the Arabic catalog from [re-3arabi](https://github.com/Abodabodd/re-3arabi). Not affiliated with any of the indexed sites.
